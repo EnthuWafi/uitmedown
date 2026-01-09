@@ -1,4 +1,4 @@
-package com.enth.uitmedown.ui;
+package com.enth.uitmedown.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.adapter.ItemAdapter;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ItemService itemService;
 
     SharedPrefManager spm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,36 +49,55 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-
-        // greet the user
-        // if the user is not logged in we will directly them to LoginActivity
+        // 1. Check Login
         spm = new SharedPrefManager(getApplicationContext());
-        if (!spm.isLoggedIn()) { // no session record
-            // forward to Login Page
+        if (!spm.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish(); // Good practice to finish here so code below doesn't run
             return;
         }
 
+        // 2. Setup UI
         rvItems = findViewById(R.id.rvItems);
         rvItems.setLayoutManager(new LinearLayoutManager(this));
 
+        // 3. Setup Add Button (Now opens the Activity!)
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(v -> {
-            // TODO: Navigate to "Add Item" Page
-            Toast.makeText(this, "Add Item Clicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, CreateItemActivity.class);
+            startActivity(intent);
         });
-
-        itemService = ApiUtils.getItemService();
-        loadItems();
 
         Button btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(this::logoutClicked);
+
+        // 4. Init Service (But don't load items yet, onResume will do it)
+        itemService = ApiUtils.getItemService();
+    }
+
+    /**
+     * This method runs every time the Activity comes into view.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadItems();
     }
 
     private void loadItems() {
+        // Safety check in case spm/service isn't ready
+        if (spm == null || itemService == null) return;
+
         User user = spm.getUser();
+
+        // Ensure user object isn't null to avoid crashes
+        if (user == null || user.getToken() == null) {
+            logoutClicked(null);
+            return;
+        }
+
         Call<List<Item>> call = itemService.getAllItems(user.getToken());
 
         call.enqueue(new Callback<List<Item>>() {
@@ -89,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                     adapter = new ItemAdapter(MainActivity.this, items);
                     rvItems.setAdapter(adapter);
                 } else {
-                    Toast.makeText(MainActivity.this, "Failed to load items", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Failed to load items. Code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -102,15 +123,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void logoutClicked(View view) {
-
-        // implement this
         SharedPrefManager spm = new SharedPrefManager(getApplicationContext());
         spm.logout();
-        // display message
-        Toast.makeText(getApplicationContext(),
-                "You have successfully logged out.",
-                Toast.LENGTH_LONG).show();
-        // forward to Login Page
+
+        Toast.makeText(getApplicationContext(), "You have successfully logged out.", Toast.LENGTH_LONG).show();
+
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

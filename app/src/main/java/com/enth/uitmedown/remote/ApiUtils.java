@@ -1,6 +1,8 @@
 package com.enth.uitmedown.remote;
 
 
+import com.enth.uitmedown.model.Notification;
+
 public class ApiUtils {
 
 
@@ -12,5 +14,14 @@ public class ApiUtils {
     public static ItemService getItemService() {
         return RetrofitClient.getClient().create(ItemService.class);
     }
+
+    public static TransactionService getTransactionService() {
+        return RetrofitClient.getClient().create(TransactionService.class);
+    }
+    public static NotificationService getNotificationService() {
+        return RetrofitClient.getClient().create(NotificationService.class);
+    }
+
+
 
 }

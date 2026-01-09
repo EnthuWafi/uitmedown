@@ -1,4 +1,4 @@
-package com.enth.uitmedown.ui;
+package com.enth.uitmedown.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;

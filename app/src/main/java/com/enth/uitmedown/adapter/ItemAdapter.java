@@ -1,4 +1,4 @@
-package com.enth.uitmedown.ui;
+package com.enth.uitmedown.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

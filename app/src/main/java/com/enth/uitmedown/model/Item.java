@@ -2,7 +2,9 @@ package com.enth.uitmedown.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Item {
+import java.io.Serializable;
+
+public class Item implements Serializable {
 
     // Use Integer/Double objects (wrappers) instead of int/double primitives
     // to prevent crashes if the server sends null.
@@ -26,6 +28,9 @@ public class Item {
 
     @SerializedName("image_url")
     private String imageUrl;
+
+    @SerializedName("file")
+    private File file;
 
     @SerializedName("status")
     private String status;

@@ -1,16 +1,28 @@
 package com.enth.uitmedown.model;
 
+import com.google.gson.annotations.SerializedName;
 public class User {
 
     // represent a record in users tables
+    @SerializedName("id")
     private int id;
+    @SerializedName("email")
     private String email;
+
+    @SerializedName("username")
     private String username;
+    @SerializedName("password")
     private String password;
+    @SerializedName("token")
     private String token;
+    @SerializedName("lease")
     private String lease;
+
+    @SerializedName("role")
     private String role;
+    @SerializedName("is_active")
     private int is_active;
+    @SerializedName("secret")
     private String secret;
 
     public int getId() {
