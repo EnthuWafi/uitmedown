@@ -1,8 +1,9 @@
 package com.enth.uitmedown.model;
 
+import java.io.Serializable;
 import java.lang.Error;
 
-public class FailLogin {
+public class FailLogin implements Serializable {
     // fail login
     private String status;
     private java.lang.Error error;

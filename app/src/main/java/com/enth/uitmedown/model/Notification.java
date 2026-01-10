@@ -1,18 +1,36 @@
 package com.enth.uitmedown.model;
 
 import com.google.gson.annotations.SerializedName;
-public class Notification {
+
+import java.io.Serializable;
+
+public class Notification implements Serializable {
     @SerializedName("notification_id")
     private Integer notificationId;
 
-    @SerializedName("user_id")
-    private Integer userId;
+    @SerializedName("sender")
+    private User sender;
+
+    @SerializedName("sender_id")
+    private Integer senderId;
+
+    @SerializedName("receiver")
+    private User receiver;
+
+    @SerializedName("receiver_id")
+    private Integer receiverId;
+
+    @SerializedName("event")
+    private Event event;
+
+    @SerializedName("event_id")
+    private String eventId;
 
     @SerializedName("title")
     private String title;
 
-    @SerializedName("message")
-    private String message;
+    @SerializedName("transaction")
+    private Transaction transaction;
 
     @SerializedName("transaction_id")
     private Integer transactionId;
@@ -23,6 +41,15 @@ public class Notification {
     @SerializedName("created_at")
     private String createdAt;
 
+    public Integer getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Integer transactionId) {
+        this.transactionId = transactionId;
+    }
+
+
     public Integer getNotificationId() {
         return notificationId;
     }
@@ -31,13 +58,6 @@ public class Notification {
         this.notificationId = notificationId;
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
 
     public String getTitle() {
         return title;
@@ -47,20 +67,60 @@ public class Notification {
         this.title = title;
     }
 
-    public String getMessage() {
-        return message;
+    public Event getEvent() {
+        return event;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
-    public Integer getTransactionId() {
-        return transactionId;
+    public User getSender() {
+        return sender;
     }
 
-    public void setTransactionId(Integer transactionId) {
-        this.transactionId = transactionId;
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public Integer getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Integer senderId) {
+        this.senderId = senderId;
+    }
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+    public Integer getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Integer receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
 
     public Boolean getRead() {

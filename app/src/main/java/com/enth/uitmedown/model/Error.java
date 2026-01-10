@@ -1,6 +1,8 @@
 package com.enth.uitmedown.model;
 
-public class Error {
+import java.io.Serializable;
+
+public class Error implements Serializable {
     private String code;
     private String status;
     private String message;

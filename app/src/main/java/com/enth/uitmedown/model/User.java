@@ -1,7 +1,10 @@
 package com.enth.uitmedown.model;
 
 import com.google.gson.annotations.SerializedName;
-public class User {
+
+import java.io.Serializable;
+
+public class User implements Serializable  {
 
     // represent a record in users tables
     @SerializedName("id")
@@ -21,7 +24,7 @@ public class User {
     @SerializedName("role")
     private String role;
     @SerializedName("is_active")
-    private int is_active;
+    private int isActive;
     @SerializedName("secret")
     private String secret;
 
@@ -81,12 +84,12 @@ public class User {
         this.role = role;
     }
 
-    public int getIs_active() {
-        return is_active;
+    public int getIsActive() {
+        return isActive;
     }
 
-    public void setIs_active(int is_active) {
-        this.is_active = is_active;
+    public void setIsActive(int isActive) {
+        this.isActive = isActive;
     }
 
     public String getSecret() {

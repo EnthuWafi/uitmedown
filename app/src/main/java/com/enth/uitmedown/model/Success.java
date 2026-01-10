@@ -1,6 +1,8 @@
 package com.enth.uitmedown.model;
 
-class Success {
+import java.io.Serializable;
+
+class Success implements Serializable {
     public int code;
     public String status;
 

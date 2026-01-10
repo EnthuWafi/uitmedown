@@ -1,5 +1,8 @@
 package com.enth.uitmedown.model;
-public class DeleteResponse {
+
+import java.io.Serializable;
+
+public class DeleteResponse implements Serializable {
     private int status;
     private Success success;
 

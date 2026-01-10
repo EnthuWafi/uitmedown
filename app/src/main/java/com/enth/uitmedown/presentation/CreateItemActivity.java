@@ -13,17 +13,17 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.model.FileModel;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.remote.ItemService;
 import com.enth.uitmedown.remote.RetrofitClient;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
+import com.enth.uitmedown.utils.FileUtils;
+
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -112,7 +112,7 @@ public class CreateItemActivity extends AppCompatActivity {
         btnPost.setEnabled(false); // Prevent double clicks
 
         // Convert URI to a standard File object
-        File file = getFileFromUri(selectedImageUri);
+        File file = FileUtils.getFileFromUri(this, selectedImageUri);
 
         if (file == null) {
             Toast.makeText(this, "Error processing image file", Toast.LENGTH_SHORT).show();
@@ -130,12 +130,12 @@ public class CreateItemActivity extends AppCompatActivity {
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
         // Execute API Call
-        itemService.uploadFile(user.getToken(), body).enqueue(new Callback<ResponseBody>() {
+        itemService.uploadFile(user.getToken(), body).enqueue(new Callback<FileModel>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<FileModel> call, Response<FileModel> response) {
                 if (response.isSuccessful()) {
-                    // Example output: "uploads/files/1-temp_image_12345.jpg"
-                    String serverPath = response.body().toString();
+                    FileModel fileModel = response.body();
+                    String serverPath = fileModel.getFile();
 
                     // Clean up any extra quotes if the server sent it as a JSON string
                     serverPath = serverPath.replace("\"", "").trim();
@@ -153,8 +153,8 @@ public class CreateItemActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(CreateItemActivity.this, "Upload Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<FileModel> call, Throwable throwable) {
+                Toast.makeText(CreateItemActivity.this, "Upload Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 btnPost.setEnabled(true);
             }
         });
@@ -172,7 +172,7 @@ public class CreateItemActivity extends AppCompatActivity {
         newItem.setTitle(title);
         newItem.setPrice(price);
         newItem.setDescription(desc);
-        newItem.setImageUrl(imageUrl); // The URL we got from Phase 1
+        newItem.setImageUrl(imageUrl);
         newItem.setSellerId(user.getId());
         newItem.setStatus("Available");
 
@@ -194,27 +194,5 @@ public class CreateItemActivity extends AppCompatActivity {
                 btnPost.setEnabled(true);
             }
         });
-    }
-
-    // --- HELPER: CONVERT URI TO FILE ---
-    private File getFileFromUri(Uri uri) {
-        try {
-            File file = new File(getCacheDir(), "temp_image_" + System.currentTimeMillis() + ".jpg");
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            OutputStream outputStream = new FileOutputStream(file);
-
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-
-            outputStream.close();
-            inputStream.close();
-            return file;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }

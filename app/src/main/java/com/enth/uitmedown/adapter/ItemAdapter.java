@@ -1,6 +1,7 @@
 package com.enth.uitmedown.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.presentation.ItemDetailActivity;
 
 import java.util.List;
 
@@ -46,6 +48,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
             Glide.with(context).load(item.getImageUrl()).into(holder.imgItem);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ItemDetailActivity.class);
+            intent.putExtra("item", item);
+            context.startActivity(intent);
+        });
     }
 
     @Override
@@ -53,7 +61,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         return itemList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvPrice, tvStatus;
         ImageView imgItem;
 
@@ -64,5 +72,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             tvStatus = itemView.findViewById(R.id.tvStatus);
             imgItem = itemView.findViewById(R.id.imgItem);
         }
+
     }
 }

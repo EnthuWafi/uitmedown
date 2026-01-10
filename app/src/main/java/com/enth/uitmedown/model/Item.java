@@ -6,10 +6,11 @@ import java.io.Serializable;
 
 public class Item implements Serializable {
 
-    // Use Integer/Double objects (wrappers) instead of int/double primitives
-    // to prevent crashes if the server sends null.
     @SerializedName("item_id")
     private Integer itemId;
+
+    @SerializedName("seller")
+    private User seller;
 
     @SerializedName("seller_id")
     private Integer sellerId;
@@ -30,7 +31,7 @@ public class Item implements Serializable {
     private String imageUrl;
 
     @SerializedName("file")
-    private File file;
+    private FileModel file;
 
     @SerializedName("status")
     private String status;
@@ -51,12 +52,20 @@ public class Item implements Serializable {
         this.itemId = itemId;
     }
 
-    public Integer getSellerId() {
-        return sellerId;
+    public User getSeller() {
+        return seller;
     }
 
-    public void setSellerId(Integer sellerId) {
-        this.sellerId = sellerId;
+    public void setSeller(User seller) {
+        this.seller = seller;
+    }
+
+    public FileModel getFile() {
+        return file;
+    }
+
+    public void setFile(FileModel file) {
+        this.file = file;
     }
 
     public String getTitle() {
@@ -113,5 +122,13 @@ public class Item implements Serializable {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Integer sellerId) {
+        this.sellerId = sellerId;
     }
 }

@@ -18,19 +18,18 @@ import retrofit2.http.Path;
 public interface NotificationService {
 
     @GET("notifications")
-    Call<List<Notification>> getAllTransactions(@Header("api_key") String apiKey);
+    Call<List<Notification>> getAllNotification(@Header("api_key") String apiKey);
 
     @GET("notifications/{id}")
-    Call<Notification> getTransactionById(@Header("api_key") String apiKey, @Path("id") int id);
+    Call<Notification> getNotificationById(@Header("api_key") String apiKey, @Path("id") int id);
 
     @POST("notifications")
-    Call<Notification> createTransaction(@Header("api_key") String apiKey, @Body Notification notification);
+    Call<Notification> createNotification(@Header("api_key") String apiKey, @Body Notification notification);
 
     @PUT("notifications/{id}")
-    Call<Notification> updateTransaction(@Header("api_key") String apiKey, @Path("id") int id, @Body Notification notification);
+    Call<Notification> updateNotification(@Header("api_key") String apiKey, @Path("id") int id, @Body Notification notification);
 
     @DELETE("notifications/{id}")
-    Call<DeleteResponse> deleteTransaction(@Header("api_key") String apiKey, @Path("id") int id);
-
+    Call<DeleteResponse> deleteNotification(@Header("api_key") String apiKey, @Path("id") int id);
 
 }
