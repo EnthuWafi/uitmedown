@@ -35,6 +35,12 @@ public class Transaction implements Serializable {
     @SerializedName("created_at")
     private String createdAt;
 
+    @SerializedName("meetup_location")
+    private String meetupLocation;
+
+    @SerializedName("seller_note")
+    private String sellerNote;
+
     public Integer getTransactionId() {
         return transactionId;
     }
@@ -114,5 +120,21 @@ public class Transaction implements Serializable {
 
     public void setItemId(Integer itemId) {
         this.itemId = itemId;
+    }
+
+    public String getMeetupLocation() {
+        return meetupLocation;
+    }
+
+    public void setMeetupLocation(String meetupLocation) {
+        this.meetupLocation = meetupLocation;
+    }
+
+    public String getSellerNote() {
+        return sellerNote;
+    }
+
+    public void setSellerNote(String sellerNote) {
+        this.sellerNote = sellerNote;
     }
 }

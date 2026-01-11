@@ -2,4 +2,23 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="main">#FF6200</color>
+
+    <color name="transparent">#00000000</color>
+
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorAccent">#FF6200</color>
+    <color name="pageBackground">#F5F5F5</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textInactive">#BDBDBD</color>
+
+    <color name="status_pending_bg">#FFF3E0</color>
+    <color name="status_pending_text">#E65100</color>
+
+    <color name="status_accepted_bg">#E8F5E9</color>
+    <color name="status_accepted_text">#2E7D32</color>
+
+    <color name="status_rejected_bg">#FFEBEE</color>
+    <color name="status_rejected_text">#C62828</color>
 </resources>

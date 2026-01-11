@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class File implements Serializable {
+public class FileModel implements Serializable {
     @SerializedName("id")
     private Integer id;
 

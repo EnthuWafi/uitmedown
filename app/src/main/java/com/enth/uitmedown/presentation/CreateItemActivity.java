@@ -137,13 +137,8 @@ public class CreateItemActivity extends AppCompatActivity {
                     FileModel fileModel = response.body();
                     String serverPath = fileModel.getFile();
 
-                    // Clean up any extra quotes if the server sent it as a JSON string
-                    serverPath = serverPath.replace("\"", "").trim();
+                    String fullUrl = RetrofitClient.BASE_URL + "/" + serverPath;
 
-                    String fullUrl = RetrofitClient.BASE_URL + "upload/" + serverPath;
-
-                    // Let's proceed to create the item logic
-                    // You might need to adjust this depending on exactly what pRESTige returns
                     createItemInDatabase(fullUrl);
 
                 } else {

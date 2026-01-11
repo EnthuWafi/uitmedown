@@ -9,11 +9,14 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 import com.enth.uitmedown.model.DeleteResponse;
 import com.enth.uitmedown.model.Transaction;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TransactionService {
 
@@ -22,6 +25,24 @@ public interface TransactionService {
 
     @GET("transactions/{id}")
     Call<Transaction> getTransactionById(@Header("api_key") String apiKey, @Path("id") int id);
+
+    @GET("transactions")
+    Call<List<Transaction>> getTransactions(
+            @Header("api_key") String apiKey,
+            @QueryMap Map<String, String> options
+    );
+
+    @GET("transactions")
+    Call<List<Transaction>> getTransactionsBySellerId(
+            @Header("api_key") String apiKey,
+            @Query("seller_id[in]") int sellerId
+    );
+
+    @GET("transactions")
+    Call<List<Transaction>> getTransactionsByBuyerId(
+            @Header("api_key") String apiKey,
+            @Query("buyer_id[in]") int buyerId
+    );
 
     @POST("transactions")
     Call<Transaction> createTransaction(@Header("api_key") String apiKey, @Body Transaction transaction);

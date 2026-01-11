@@ -1,4 +1,4 @@
-package com.enth.uitmedown.adapter;
+package com.enth.uitmedown.presentation.adapter;
 
 import android.content.Context;
 import android.content.Intent;

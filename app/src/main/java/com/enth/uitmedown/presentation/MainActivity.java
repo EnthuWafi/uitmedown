@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,13 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.enth.uitmedown.R;
-import com.enth.uitmedown.adapter.ItemAdapter;
+import com.enth.uitmedown.presentation.adapter.ItemAdapter;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.remote.ItemService;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.enth.uitmedown.utils.NavigationUtils;
 
 import java.util.List;
 
@@ -49,32 +48,24 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 1. Check Login
-        spm = new SharedPrefManager(getApplicationContext());
-        if (!spm.isLoggedIn()) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish(); // Good practice to finish here so code below doesn't run
-            return;
-        }
+//        // 1. Check Login
+//        spm = new SharedPrefManager(getApplicationContext());
+//        if (!spm.isLoggedIn()) {
+//            Intent intent = new Intent(this, LoginActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            startActivity(intent);
+//            finish(); // Good practice to finish here so code below doesn't run
+//            return;
+//        }
+        NavigationUtils.setupBottomNav(this);
 
         // 2. Setup UI
         rvItems = findViewById(R.id.rvItems);
         rvItems.setLayoutManager(new LinearLayoutManager(this));
 
-        // 3. Setup Add Button (Now opens the Activity!)
-        FloatingActionButton fab = findViewById(R.id.fabAdd);
-        fab.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CreateItemActivity.class);
-            startActivity(intent);
-        });
-
-        Button btnLogout = findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(this::logoutClicked);
-
         // 4. Init Service (But don't load items yet, onResume will do it)
         itemService = ApiUtils.getItemService();
+
     }
 
     /**
@@ -91,12 +82,6 @@ public class MainActivity extends AppCompatActivity {
         if (spm == null || itemService == null) return;
 
         User user = spm.getUser();
-
-        // Ensure user object isn't null to avoid crashes
-        if (user == null || user.getToken() == null) {
-            logoutClicked(null);
-            return;
-        }
 
         Call<List<Item>> call = itemService.getAllItems(user.getToken());
 
@@ -117,19 +102,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<Item>> call, Throwable t) {
                 Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("UiTMeDown", t.toString());
             }
         });
     }
 
-    public void logoutClicked(View view) {
-        SharedPrefManager spm = new SharedPrefManager(getApplicationContext());
-        spm.logout();
-
-        Toast.makeText(getApplicationContext(), "You have successfully logged out.", Toast.LENGTH_LONG).show();
-
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
 }
