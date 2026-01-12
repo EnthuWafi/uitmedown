@@ -18,6 +18,7 @@ import com.enth.uitmedown.model.DeleteResponse;
 import com.enth.uitmedown.model.FileModel;
 import com.enth.uitmedown.model.Item;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,12 @@ public interface ItemService {
 
     @GET("items")
     Call<List<Item>> getItems(@Header("api_key") String apiKey, @QueryMap Map<String, String> options);
+
+    default Call<List<Item>> getAllAvailableItems(@Header("api_key") String apiKey) {
+        Map<String, String> options = new HashMap<>();
+        options.put("status[in]", "Available");
+        return getItems(apiKey, options);
+    }
 
     @GET("items")
     Call<List<Item>> getItemsBySellerId(@Header("api_key") String apiKey, @Query("seller_id[in]") int sellerId);

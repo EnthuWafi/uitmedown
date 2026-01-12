@@ -8,9 +8,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.model.FileModel;
@@ -47,7 +51,13 @@ public class CreateItemActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_create_item);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // 1. Init Views
         imgPreview = findViewById(R.id.imgPreview);
@@ -135,11 +145,8 @@ public class CreateItemActivity extends AppCompatActivity {
             public void onResponse(Call<FileModel> call, Response<FileModel> response) {
                 if (response.isSuccessful()) {
                     FileModel fileModel = response.body();
-                    String serverPath = fileModel.getFile();
 
-                    String fullUrl = RetrofitClient.BASE_URL + "/" + serverPath;
-
-                    createItemInDatabase(fullUrl);
+                    createItemInDatabase(fileModel);
 
                 } else {
                     Toast.makeText(CreateItemActivity.this, "Upload Failed: " + response.message(), Toast.LENGTH_SHORT).show();
@@ -156,8 +163,13 @@ public class CreateItemActivity extends AppCompatActivity {
     }
 
     // --- PHASE 2: CREATE THE ITEM ---
-    private void createItemInDatabase(String imageUrl) {
+    private void createItemInDatabase(FileModel fileModel) {
         User user = spm.getUser();
+
+        String serverPath = fileModel.getFile();
+
+        String fullUrl = RetrofitClient.BASE_URL + serverPath;
+
 
         String title = edtTitle.getText().toString();
         Double price = Double.parseDouble(edtPrice.getText().toString());
@@ -167,7 +179,8 @@ public class CreateItemActivity extends AppCompatActivity {
         newItem.setTitle(title);
         newItem.setPrice(price);
         newItem.setDescription(desc);
-        newItem.setImageUrl(imageUrl);
+        newItem.setImageUrl(fullUrl);
+        newItem.setFileId(fileModel.getId());
         newItem.setSellerId(user.getId());
         newItem.setStatus("Available");
 

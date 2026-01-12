@@ -33,6 +33,9 @@ public class Item implements Serializable {
     @SerializedName("file")
     private FileModel file;
 
+    @SerializedName("file_id")
+    private Integer fileId;
+
     @SerializedName("status")
     private String status;
 
@@ -130,5 +133,13 @@ public class Item implements Serializable {
 
     public void setSellerId(Integer sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 }

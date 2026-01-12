@@ -48,22 +48,18 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-//        // 1. Check Login
-//        spm = new SharedPrefManager(getApplicationContext());
-//        if (!spm.isLoggedIn()) {
-//            Intent intent = new Intent(this, LoginActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            startActivity(intent);
-//            finish(); // Good practice to finish here so code below doesn't run
-//            return;
-//        }
+        spm = new SharedPrefManager(this);
+
         NavigationUtils.setupBottomNav(this);
 
         // 2. Setup UI
         rvItems = findViewById(R.id.rvItems);
         rvItems.setLayoutManager(new LinearLayoutManager(this));
 
-        // 4. Init Service (But don't load items yet, onResume will do it)
+        findViewById(R.id.btnNotifications).setOnClickListener(v -> {
+            doOpenNotification();
+        });
+
         itemService = ApiUtils.getItemService();
 
     }
@@ -83,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         User user = spm.getUser();
 
-        Call<List<Item>> call = itemService.getAllItems(user.getToken());
+        Call<List<Item>> call = itemService.getAllAvailableItems(user.getToken());
 
         call.enqueue(new Callback<List<Item>>() {
             @Override
@@ -104,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void doOpenNotification() {
+        startActivity(new Intent(MainActivity.this, NotificationActivity.class));
     }
 
 }

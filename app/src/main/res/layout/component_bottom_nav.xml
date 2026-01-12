@@ -8,27 +8,29 @@
     android:elevation="16dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:weightSum="5"> <LinearLayout
-    android:id="@+id/navHome"
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="?attr/selectableItemBackground">
+    android:weightSum="5">
 
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_home_black_24dp"
-        app:tint="@color/colorPrimary"/>
-    <TextView
+    <LinearLayout
+        android:id="@+id/navHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/ivHome"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_home_black_24dp"
+            app:tint="@color/textInactive"/> <TextView
+        android:id="@+id/tvHome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Home"
         android:textSize="9sp"
-        android:textColor="@color/colorPrimary"/>
-</LinearLayout>
+        android:textColor="@color/textInactive"/> </LinearLayout>
 
     <LinearLayout
         android:id="@+id/navRequests"
@@ -40,15 +42,18 @@
         android:background="?attr/selectableItemBackground">
 
         <ImageView
+            android:id="@+id/ivRequests"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_menu_sort_by_size"
-            app:tint="@color/textInactive"/> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Requests"
-        android:textSize="9sp"
-        android:textColor="@color/textInactive"/>
+            app:tint="@color/textInactive"/>
+        <TextView
+            android:id="@+id/tvRequests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Requests"
+            android:textSize="9sp"
+            android:textColor="@color/textInactive"/>
     </LinearLayout>
 
     <LinearLayout
@@ -61,11 +66,13 @@
         android:background="?attr/selectableItemBackground">
 
         <ImageView
+            android:id="@+id/ivSell"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@android:drawable/ic_input_add"
             app:tint="@color/colorAccent"/>
         <TextView
+            android:id="@+id/tvSell"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SELL"
@@ -84,15 +91,18 @@
         android:background="?attr/selectableItemBackground">
 
         <ImageView
+            android:id="@+id/ivMyItems"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_menu_agenda"
-            app:tint="@color/textInactive"/> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="My Items"
-        android:textSize="9sp"
-        android:textColor="@color/textInactive"/>
+            app:tint="@color/textInactive"/>
+        <TextView
+            android:id="@+id/tvMyItems"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My Items"
+            android:textSize="9sp"
+            android:textColor="@color/textInactive"/>
     </LinearLayout>
 
     <LinearLayout
@@ -105,11 +115,13 @@
         android:background="?attr/selectableItemBackground">
 
         <ImageView
+            android:id="@+id/ivProfile"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_menu_my_calendar"
             app:tint="@color/textInactive"/>
         <TextView
+            android:id="@+id/tvProfile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profile"

@@ -4,7 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
+
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.presentation.CreateItemActivity;
 import com.enth.uitmedown.presentation.MainActivity;
@@ -55,5 +60,31 @@ public class NavigationUtils {
                 activity.overridePendingTransition(0, 0);
             }
         });
+
+        highlightActiveTab(activity);
+    }
+
+    private static void highlightActiveTab(Activity activity) {
+        if (activity instanceof MainActivity) {
+            enableTab(activity, R.id.ivHome, R.id.tvHome);
+        } else if (activity instanceof RequestsActivity) {
+            enableTab(activity, R.id.ivRequests, R.id.tvRequests);
+        } else if (activity instanceof MyListingsActivity) {
+            enableTab(activity, R.id.ivMyItems, R.id.tvMyItems);
+        } else if (activity instanceof ProfileActivity) {
+            enableTab(activity, R.id.ivProfile, R.id.tvProfile);
+        }
+    }
+
+    private static void enableTab(Activity activity, int imageId, int textId) {
+        ImageView icon = activity.findViewById(imageId);
+        TextView text = activity.findViewById(textId);
+
+        int color = ContextCompat.getColor(activity, R.color.colorPrimary);
+
+        if (icon != null && text != null) {
+            icon.setColorFilter(color);
+            text.setTextColor(color);
+        }
     }
 }
