@@ -35,7 +35,7 @@ public interface ItemService {
 
     default Call<List<Item>> getAllAvailableItems(@Header("api_key") String apiKey) {
         Map<String, String> options = new HashMap<>();
-        options.put("status[in]", "Available");
+        options.put("status", "available");
         return getItems(apiKey, options);
     }
 

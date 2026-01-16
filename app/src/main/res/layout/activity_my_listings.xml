@@ -20,7 +20,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My Listings"
+        android:text="@string/my_listings"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#333333"
@@ -39,7 +39,8 @@
         app:layout_constraintTop_toBottomOf="@id/headerBg"
         app:layout_constraintBottom_toTopOf="@id/bottomNavLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_listing" />
 
     <include
         android:id="@+id/bottomNavLayout"

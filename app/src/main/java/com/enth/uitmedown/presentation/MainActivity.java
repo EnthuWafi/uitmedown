@@ -32,7 +32,6 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rvItems;
-    private ItemAdapter adapter;
     private ItemService itemService;
 
     SharedPrefManager spm;
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     List<Item> items = response.body();
 
                     // Attach the adapter
-                    adapter = new ItemAdapter(MainActivity.this, items);
+                    ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
                     rvItems.setAdapter(adapter);
                 } else {
                     Toast.makeText(MainActivity.this, "Failed to load items. Code: " + response.code(), Toast.LENGTH_SHORT).show();

@@ -66,14 +66,27 @@ public class RequestsActivity extends AppCompatActivity {
                 .enqueue(new Callback<List<Transaction>>() {
                     @Override
                     public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
+                        // 1. Check if it is a 204 (Empty) OR a 200 (With Data)
+                        if (response.isSuccessful()) {
                             List<Transaction> transactions = response.body();
 
-                            // Use the existing adapter
+                            // If 204, body is null. So we create an empty list manually.
+                            if (transactions == null) {
+                                transactions = new java.util.ArrayList<>();
+                            }
+
+                            // 2. Set the adapter (even if empty, so the list clears out)
                             OrderAdapter adapter = new OrderAdapter(RequestsActivity.this, transactions);
                             rvSelling.setAdapter(adapter);
+
+                            // Optional: Show "No Requests" text if empty
+                            if (transactions.isEmpty()) {
+                                Toast.makeText(RequestsActivity.this, "No active requests.", Toast.LENGTH_SHORT).show();
+                            }
+
                         } else {
-                            Toast.makeText(RequestsActivity.this, "Failed to load requests: " + response.code(), Toast.LENGTH_SHORT).show();
+                            // This handles actual errors (404, 500, etc.)
+                            Toast.makeText(RequestsActivity.this, "Failed: " + response.code(), Toast.LENGTH_SHORT).show();
                         }
                     }
 

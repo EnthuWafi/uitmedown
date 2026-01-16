@@ -39,6 +39,7 @@
             android:exported="false" />
         <activity
             android:name=".presentation.CreateItemActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".presentation.LoginActivity"

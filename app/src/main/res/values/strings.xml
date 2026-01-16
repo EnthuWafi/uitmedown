@@ -38,7 +38,12 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
 
-    <string name="title_home">Home</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="home">Home</string>
+    <string name="notifications">Notifications</string>
+    <string name="my_orders">My Orders</string>
+    <string name="my_listings">My Listings</string>
+    <string name="in_requests">Incoming Requests</string>
+    <string name="profile">Profile</string>
+
 
 </resources>

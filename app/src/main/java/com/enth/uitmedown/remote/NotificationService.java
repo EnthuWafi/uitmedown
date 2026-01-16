@@ -30,7 +30,7 @@ public interface NotificationService {
     Call<List<Notification>> getNotifications(@Header("api_key") String apiKey, @QueryMap Map<String, String> options);
 
     @GET("notifications")
-    Call<List<Notification>> getNotificationsByReceiverId(@Header("api_key") String apiKey, @Query("receiver_id[in]") int receiverId);
+    Call<List<Notification>> getNotificationsByReceiverId(@Header("api_key") String apiKey, @Query("receiver_id") int receiverId);
 
     @POST("notifications")
     Call<Notification> createNotification(@Header("api_key") String apiKey, @Body Notification notification);

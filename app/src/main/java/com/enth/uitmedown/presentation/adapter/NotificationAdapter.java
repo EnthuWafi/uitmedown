@@ -49,12 +49,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.tvMessage.setText(notification.getEvent().getTemplateText());
 
         // Optional: formatting date
-        // holder.tvDate.setText(DateUtils.getRelativeTime(notification.getCreatedAt()));
-        // For now, let's just show a static text or the raw string
+        // holder.tvDate.setText(DateUtils.getRelativeTime(notification.getCreatedAt()))
         holder.tvDate.setText("Recent");
 
         // 2. Handle Read/Unread Status (The Blue Dot)
-        // If your model has "isRead", use it. Otherwise, assume unread for now.
         // boolean isRead = notification.isRead();
         boolean isRead = false; // Default for testing
 

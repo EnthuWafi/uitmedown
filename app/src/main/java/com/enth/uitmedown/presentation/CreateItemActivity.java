@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.databinding.ActivityCreateItemBinding;
 import com.enth.uitmedown.model.FileModel;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.User;
@@ -39,6 +40,8 @@ import retrofit2.Response;
 
 public class CreateItemActivity extends AppCompatActivity {
 
+    private ActivityCreateItemBinding binding;
+
     private ImageView imgPreview;
     private EditText edtTitle, edtPrice, edtDescription;
     private Button btnPost;
@@ -51,11 +54,13 @@ public class CreateItemActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_create_item);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+        binding = ActivityCreateItemBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            boolean isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            int keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            v.setPadding(0, 0, 0, isKeyboardVisible ? keyboardHeight : 0);
             return insets;
         });
 
