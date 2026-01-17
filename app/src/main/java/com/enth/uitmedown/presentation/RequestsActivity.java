@@ -1,5 +1,6 @@
 package com.enth.uitmedown.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -38,24 +39,18 @@ public class RequestsActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 1. Setup SharedPref
         spm = new SharedPrefManager(this);
 
-        // Safety Check: Ensure user is logged in
         if (!spm.isLoggedIn()) {
             finish();
             return;
         }
 
-        // 2. Setup Navigation
         NavigationUtils.setupBottomNav(this);
 
-        // 3. Init Views (Only the Selling/Requests list)
-        // Make sure your XML now only has this one RecyclerView
         rvSelling = findViewById(R.id.rvSelling);
         rvSelling.setLayoutManager(new LinearLayoutManager(this));
 
-        // 4. Load Data
         loadIncomingRequests();
     }
 
@@ -66,7 +61,6 @@ public class RequestsActivity extends AppCompatActivity {
                 .enqueue(new Callback<List<Transaction>>() {
                     @Override
                     public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                        // 1. Check if it is a 204 (Empty) OR a 200 (With Data)
                         if (response.isSuccessful()) {
                             List<Transaction> transactions = response.body();
 
@@ -75,11 +69,16 @@ public class RequestsActivity extends AppCompatActivity {
                                 transactions = new java.util.ArrayList<>();
                             }
 
-                            // 2. Set the adapter (even if empty, so the list clears out)
-                            OrderAdapter adapter = new OrderAdapter(RequestsActivity.this, transactions);
+                            // 2. Set the adapter
+                            OrderAdapter adapter = new OrderAdapter(RequestsActivity.this, transactions, transaction -> {
+                                // REDIRECT TO DETAILS
+                                Intent intent = new Intent(RequestsActivity.this, TransactionDetailActivity.class);
+                                intent.putExtra("TRANSACTION_ID", transaction.getTransactionId());
+                                startActivity(intent);
+                            });
                             rvSelling.setAdapter(adapter);
 
-                            // Optional: Show "No Requests" text if empty
+                            // Show "No Requests" text if empty
                             if (transactions.isEmpty()) {
                                 Toast.makeText(RequestsActivity.this, "No active requests.", Toast.LENGTH_SHORT).show();
                             }

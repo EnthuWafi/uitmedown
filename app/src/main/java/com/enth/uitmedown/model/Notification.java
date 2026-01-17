@@ -36,7 +36,7 @@ public class Notification implements Serializable {
     private Integer transactionId;
 
     @SerializedName("is_read")
-    private Boolean isRead;
+    private Integer isRead;
 
     @SerializedName("created_at")
     private String createdAt;
@@ -124,11 +124,11 @@ public class Notification implements Serializable {
     }
 
     public Boolean getRead() {
-        return isRead;
+        return isRead != null && isRead == 1;
     }
 
     public void setRead(Boolean read) {
-        isRead = read;
+        this.isRead = (read ? 1 : 0);
     }
 
     public String getCreatedAt() {

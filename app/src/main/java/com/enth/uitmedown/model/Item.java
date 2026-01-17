@@ -27,9 +27,6 @@ public class Item implements Serializable {
     @SerializedName("category")
     private String category;
 
-    @SerializedName("image_url")
-    private String imageUrl;
-
     @SerializedName("file")
     private FileModel file;
 
@@ -103,13 +100,6 @@ public class Item implements Serializable {
         this.category = category;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     public String getStatus() {
         return status;

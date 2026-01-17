@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -68,7 +69,8 @@
             android:background="#FFFFFF"
             android:elevation="2dp"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -128,7 +130,8 @@
             android:layout_marginTop="16dp"
             android:background="#E8F5E9"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -159,13 +162,12 @@
             android:id="@+id/tvRejectedNotice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="❌ This order was rejected."
-            android:textColor="#C62828"
-            android:textAlignment="center"
-            android:padding="16dp"
+            android:layout_marginTop="16dp"
             android:background="#FFEBEE"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"/>
+            android:padding="16dp"
+            android:text="❌ This order was rejected."
+            android:textAlignment="center"
+            android:textColor="#C62828" />
 
     </LinearLayout>
 </ScrollView>

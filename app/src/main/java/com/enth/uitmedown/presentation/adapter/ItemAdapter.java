@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.presentation.ItemDetailActivity;
+import com.enth.uitmedown.remote.RetrofitClient;
 
 import java.util.List;
 
@@ -45,8 +46,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.tvStatus.setText(item.getStatus());
 
         // Load Image using Glide (or just a placeholder if null)
-        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-            Glide.with(context).load(item.getImageUrl()).into(holder.imgItem);
+        if (item.getFile() != null) {
+            String serverPath = item.getFile().getFile();
+            String fullUrl = RetrofitClient.BASE_URL + serverPath;
+
+            Glide.with(context).load(fullUrl).into(holder.imgItem);
         }
 
         holder.itemView.setOnClickListener(v -> {

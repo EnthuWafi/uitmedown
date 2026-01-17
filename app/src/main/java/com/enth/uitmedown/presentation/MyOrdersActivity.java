@@ -1,5 +1,6 @@
 package com.enth.uitmedown.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -68,20 +69,28 @@ public class MyOrdersActivity extends AppCompatActivity {
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> list = response.body();
+
                     if (list.isEmpty()) {
                         tvEmpty.setVisibility(View.VISIBLE);
                         rvOrders.setVisibility(View.GONE);
                     } else {
                         tvEmpty.setVisibility(View.GONE);
                         rvOrders.setVisibility(View.VISIBLE);
-                        rvOrders.setAdapter(new OrderAdapter(MyOrdersActivity.this, list));
+
+                        OrderAdapter adapter = new OrderAdapter(MyOrdersActivity.this, list, transaction -> {
+                            // REDIRECT TO DETAILS
+                            Intent intent = new Intent(MyOrdersActivity.this, TransactionDetailActivity.class);
+                            intent.putExtra("TRANSACTION_ID", transaction.getTransactionId());
+                            startActivity(intent);
+                        });
+
+                        rvOrders.setAdapter(adapter);
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Toast.makeText(MyOrdersActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                // ...
             }
         });
     }

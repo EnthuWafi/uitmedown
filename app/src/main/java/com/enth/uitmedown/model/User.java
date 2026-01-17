@@ -28,6 +28,12 @@ public class User implements Serializable  {
     @SerializedName("secret")
     private String secret;
 
+    @SerializedName("user_detail")
+    private UserDetail userDetail;
+
+    @SerializedName("user_detail_id")
+    private int userDetailId;
+
     public int getId() {
         return id;
     }
@@ -101,4 +107,19 @@ public class User implements Serializable  {
     }
 
 
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
+
+    public int getUserDetailId() {
+        return userDetailId;
+    }
+
+    public void setUserDetailId(int userDetailId) {
+        this.userDetailId = userDetailId;
+    }
 }

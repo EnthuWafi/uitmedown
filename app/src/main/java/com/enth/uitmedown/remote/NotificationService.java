@@ -2,7 +2,7 @@ package com.enth.uitmedown.remote;
 
 import com.enth.uitmedown.model.DeleteResponse;
 import com.enth.uitmedown.model.Notification;
-import com.enth.uitmedown.model.Transaction;
+import com.enth.uitmedown.model.MyNotificationResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +29,11 @@ public interface NotificationService {
     @GET("notifications")
     Call<List<Notification>> getNotifications(@Header("api_key") String apiKey, @QueryMap Map<String, String> options);
 
-    @GET("notifications")
-    Call<List<Notification>> getNotificationsByReceiverId(@Header("api_key") String apiKey, @Query("receiver_id") int receiverId);
-
+    @GET("notifications/expanded")
+    Call<List<MyNotificationResponse>> getNotificationsByReceiverId(
+            @Header("api_key") String token,
+            @Query("receiver_id") int receiverId
+    );
     @POST("notifications")
     Call<Notification> createNotification(@Header("api_key") String apiKey, @Body Notification notification);
 

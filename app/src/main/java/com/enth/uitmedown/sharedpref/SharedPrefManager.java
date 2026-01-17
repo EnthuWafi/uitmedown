@@ -4,20 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.enth.uitmedown.model.User;
+import com.google.gson.Gson;
 
 public class SharedPrefManager {
     //the constants
     private static final String SHARED_PREF_NAME = "uitmedownsharedpref";
-    private static final String KEY_ID = "keyid";
-    private static final String KEY_USERNAME = "keyusername";
-    private static final String KEY_EMAIL = "keyemail";
-    private static final String KEY_TOKEN = "keytoken";
-    private static final String KEY_ROLE = "keyrole";
+    private static final String KEY_USER_JSON = "key_user_json";
 
     private final Context mCtx;
+    private final Gson gson;
 
     public SharedPrefManager(Context context) {
         mCtx = context;
+        gson = new Gson();
     }
 
     /**
@@ -28,11 +27,9 @@ public class SharedPrefManager {
     public void storeUser(User user) {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(KEY_ID, user.getId());
-        editor.putString(KEY_USERNAME, user.getUsername());
-        editor.putString(KEY_EMAIL, user.getEmail());
-        editor.putString(KEY_TOKEN, user.getToken());
-        editor.putString(KEY_ROLE, user.getRole());
+        String userJson = gson.toJson(user);
+
+        editor.putString(KEY_USER_JSON, userJson);
         editor.apply();
     }
 
@@ -43,7 +40,7 @@ public class SharedPrefManager {
 
     public boolean isLoggedIn() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_USERNAME, null) != null;
+        return sharedPreferences.getString(KEY_USER_JSON, null) != null;
     }
 
     /**
@@ -52,14 +49,12 @@ public class SharedPrefManager {
     public User getUser() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        User user = new User();
-        user.setId(sharedPreferences.getInt(KEY_ID, -1));
-        user.setUsername(sharedPreferences.getString(KEY_USERNAME, null));
-        user.setEmail(sharedPreferences.getString(KEY_EMAIL, null));
-        user.setToken(sharedPreferences.getString(KEY_TOKEN, null));
-        user.setRole(sharedPreferences.getString(KEY_ROLE, null));
+        String userJson = sharedPreferences.getString(KEY_USER_JSON, null);
 
-        return user;
+        if (userJson != null) {
+            return gson.fromJson(userJson, User.class);
+        }
+        return null;
     }
 
     /**

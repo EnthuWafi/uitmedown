@@ -2,6 +2,7 @@ package com.enth.uitmedown.presentation.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable; // Used for rounded corners on status
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +12,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.model.Transaction;
 import java.util.List;
+
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 
     private Context context;
     private List<Transaction> orderList;
+    private OnItemClickListener listener; // Listener Interface
 
-    public OrderAdapter(Context context, List<Transaction> orderList) {
+    // 1. Interface for Click Handling
+    public interface OnItemClickListener {
+        void onItemClick(Transaction transaction);
+    }
+
+    // 2. Constructor accepts the listener
+    public OrderAdapter(Context context, List<Transaction> orderList, OnItemClickListener listener) {
         this.context = context;
         this.orderList = orderList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,35 +42,57 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = orderList.get(position);
 
-        // 1. Set Item Details
-        // Note: Check if your Transaction model has the nested 'Item' object populated!
-        // If pRESTige didn't send the full item, you might only have the ID.
+        // --- Data Binding ---
+        // Safety Check: If item object is null (due to API limits), show ID
         if (transaction.getItem() != null) {
             holder.tvItemName.setText(transaction.getItem().getTitle());
         } else {
             holder.tvItemName.setText("Item #" + transaction.getItemId());
         }
 
-        holder.tvPrice.setText("RM " + String.format("%.2f", transaction.getAmount() ));
+        holder.tvPrice.setText("RM " + String.format("%.2f", transaction.getAmount()));
 
-        // 2. Status Logic (Color Coding)
-        String status = transaction.getStatus().toUpperCase(); // PENDING, ACCEPTED
+        // --- Status Logic (Color Coding) ---
+        String status = transaction.getStatus() != null ? transaction.getStatus().toUpperCase() : "PENDING";
         holder.tvStatus.setText(status);
 
-        if (status.equals("ACCEPTED")) {
-            holder.statusColor.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
-            holder.tvStatus.setTextColor(Color.parseColor("#E65100")); // Keep text orange or change to green
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Light Green
-        } else if (status.equals("REJECTED")) {
-            holder.statusColor.setBackgroundColor(Color.parseColor("#F44336")); // Red
-            holder.tvStatus.setTextColor(Color.parseColor("#C62828"));
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE"));
-        } else {
-            // Pending (Orange)
-            holder.statusColor.setBackgroundColor(Color.parseColor("#FF9800"));
-            holder.tvStatus.setTextColor(Color.parseColor("#E65100"));
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF3E0"));
+        int bgColor, textColor, sideBarColor;
+
+        switch (status) {
+            case "ACCEPTED":
+                sideBarColor = Color.parseColor("#4CAF50"); // Green
+                textColor = Color.parseColor("#1B5E20");    // Dark Green Text
+                bgColor = Color.parseColor("#E8F5E9");      // Light Green BG
+                break;
+            case "REJECTED":
+                sideBarColor = Color.parseColor("#F44336"); // Red
+                textColor = Color.parseColor("#B71C1C");    // Dark Red Text
+                bgColor = Color.parseColor("#FFEBEE");      // Light Red BG
+                break;
+            default: // PENDING
+                sideBarColor = Color.parseColor("#FF9800"); // Orange
+                textColor = Color.parseColor("#E65100");    // Dark Orange Text
+                bgColor = Color.parseColor("#FFF3E0");      // Light Orange BG
+                break;
         }
+
+        // Apply Colors
+        holder.statusColor.setBackgroundColor(sideBarColor);
+        holder.tvStatus.setTextColor(textColor);
+
+        // Make the status badge rounded programmatically
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
+        shape.setCornerRadius(16f); // Rounded corners
+        shape.setColor(bgColor);
+        holder.tvStatus.setBackground(shape);
+
+        // --- Click Listener ---
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(transaction);
+            }
+        });
     }
 
     @Override

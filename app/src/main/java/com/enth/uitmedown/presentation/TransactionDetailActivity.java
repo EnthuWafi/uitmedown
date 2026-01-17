@@ -2,10 +2,6 @@ package com.enth.uitmedown.presentation;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -14,8 +10,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.enth.uitmedown.R;
+import com.enth.uitmedown.databinding.ActivityTransactionDetailBinding; // Generated automatically
 import com.enth.uitmedown.model.Item;
+import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.Transaction;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
@@ -27,20 +24,20 @@ import retrofit2.Response;
 
 public class TransactionDetailActivity extends AppCompatActivity {
 
+    private ActivityTransactionDetailBinding binding; // Binding Class
     private int transactionId;
     private Transaction currentTransaction;
-    // UI Elements
-    private TextView tvItemTitle, tvItemPrice, tvOtherParty, tvHeaderStatus;
-    private LinearLayout layoutSellerActions, layoutMeetingInfo;
-    private TextView tvMeetupLoc, tvSellerNote, tvRejectedNotice;
-    private EditText edtLocation, edtNote;
-    private Button btnAccept, btnReject;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_transaction_detail);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+
+        // 1. Inflate Binding
+        binding = ActivityTransactionDetailBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -53,29 +50,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
             return;
         }
 
-        initViews();
-
+        // 2. Load Data
         loadTransactionDetails();
-    }
-
-    private void initViews() {
-        tvItemTitle = findViewById(R.id.tvItemTitle);
-        tvItemPrice = findViewById(R.id.tvItemPrice);
-        tvOtherParty = findViewById(R.id.tvOtherPartyName);
-        tvHeaderStatus = findViewById(R.id.tvHeaderStatus);
-
-        layoutSellerActions = findViewById(R.id.layoutSellerActions);
-        layoutMeetingInfo = findViewById(R.id.layoutMeetingInfo);
-        tvRejectedNotice = findViewById(R.id.tvRejectedNotice);
-
-        tvMeetupLoc = findViewById(R.id.tvMeetupLoc);
-        tvSellerNote = findViewById(R.id.tvSellerNote);
-
-        edtLocation = findViewById(R.id.edtMeetupLocation);
-        edtNote = findViewById(R.id.edtSellerNote);
-
-        btnAccept = findViewById(R.id.btnAccept);
-        btnReject = findViewById(R.id.btnReject);
     }
 
     private void loadTransactionDetails() {
@@ -83,80 +59,84 @@ public class TransactionDetailActivity extends AppCompatActivity {
         ApiUtils.getTransactionService().getTransactionById(user.getToken(), transactionId).enqueue(new Callback<Transaction>() {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     currentTransaction = response.body();
                     updateUI();
+                } else {
+                    Toast.makeText(TransactionDetailActivity.this, "Failed to load details", Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
-            public void onFailure(Call<Transaction> call, Throwable t) { }
+            public void onFailure(Call<Transaction> call, Throwable t) {
+                Toast.makeText(TransactionDetailActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void updateUI() {
-        // 1. Basic Info
+        // --- 1. Populate Basic Info ---
         if (currentTransaction.getItem() != null) {
-            tvItemTitle.setText(currentTransaction.getItem().getTitle());
+            binding.tvItemTitle.setText(currentTransaction.getItem().getTitle());
         }
-        tvItemPrice.setText("RM " + String.format("%.2f", currentTransaction.getAmount()));
+        binding.tvItemPrice.setText("RM " + String.format("%.2f", currentTransaction.getAmount()));
 
-        // 2. Identify Roles
+        String status = currentTransaction.getStatus().toUpperCase();
+        binding.tvHeaderStatus.setText("Status: " + status);
+
+        // --- 2. Identify Roles ---
         int myId = new SharedPrefManager(this).getUser().getId();
         boolean isSeller = (myId == currentTransaction.getSellerId());
-        String status = currentTransaction.getStatus().toUpperCase(); // "PENDING", "ACCEPTED", "REJECTED"
 
-        // 3. Show "Who am I dealing with?"
         if (isSeller) {
             String buyerName = (currentTransaction.getBuyer() != null) ? currentTransaction.getBuyer().getUsername() : "Unknown";
-            tvOtherParty.setText("Buyer: " + buyerName);
+            binding.tvOtherPartyName.setText("Buyer: " + buyerName);
         } else {
             String sellerName = (currentTransaction.getSeller() != null) ? currentTransaction.getSeller().getUsername() : "Unknown";
-            tvOtherParty.setText("Seller: " + sellerName);
+            binding.tvOtherPartyName.setText("Seller: " + sellerName);
         }
 
-        // 4. LOGIC ENGINE: VISIBILITY RULES
+        // --- 3. VISIBILITY LOGIC ---
 
-        // RULE A: Meeting Info (Visible to ANYONE if Accepted)
+        // Hide everything first, then show what's needed
+        binding.layoutSellerActions.setVisibility(View.GONE);
+        binding.layoutMeetingInfo.setVisibility(View.GONE);
+        binding.tvRejectedNotice.setVisibility(View.GONE);
+
         if (status.equals("ACCEPTED")) {
-            layoutMeetingInfo.setVisibility(View.VISIBLE);
-            layoutSellerActions.setVisibility(View.GONE);
-            tvRejectedNotice.setVisibility(View.GONE);
+            // SHOW MEETING INFO
+            binding.layoutMeetingInfo.setVisibility(View.VISIBLE);
+            binding.tvMeetupLoc.setText("Location: " + currentTransaction.getMeetupLocation());
+            binding.tvSellerNote.setText("Note: " + currentTransaction.getSellerNote());
 
-            tvMeetupLoc.setText("Location: " + currentTransaction.getMeetupLocation());
-            tvSellerNote.setText("Note: " + currentTransaction.getSellerNote());
-        }
-        // RULE B: Rejection Notice (Visible to ANYONE if Rejected)
-        else if (status.equals("REJECTED")) {
-            tvRejectedNotice.setVisibility(View.VISIBLE);
-            layoutSellerActions.setVisibility(View.GONE);
-            layoutMeetingInfo.setVisibility(View.GONE);
-        }
-        // RULE C: Pending Actions (Visible ONLY to SELLER)
-        else if (status.equals("PENDING")) {
+        } else if (status.equals("REJECTED")) {
+            // SHOW REJECT NOTICE
+            binding.tvRejectedNotice.setVisibility(View.VISIBLE);
+
+        } else if (status.equals("PENDING")) {
+            // PENDING STATE
             if (isSeller) {
-                layoutSellerActions.setVisibility(View.VISIBLE);
+                // Seller can act
+                binding.layoutSellerActions.setVisibility(View.VISIBLE);
 
-                // Attach Listeners
-                btnAccept.setOnClickListener(v -> processDecision("ACCEPTED"));
-                btnReject.setOnClickListener(v -> processDecision("REJECTED"));
+                binding.btnAccept.setOnClickListener(v -> processDecision("ACCEPTED"));
+                binding.btnReject.setOnClickListener(v -> processDecision("REJECTED"));
             } else {
-                // I am the Buyer, and it's pending.
-                // Show nothing special, maybe just "Waiting for seller..."
-                layoutSellerActions.setVisibility(View.GONE);
-                tvHeaderStatus.setText("Status: Waiting for Seller");
+                // Buyer waiting...
+                binding.tvHeaderStatus.setText("Status: Waiting for Seller response");
             }
         }
     }
-    private void processDecision(String status) {
 
+    private void processDecision(String newStatus) {
         User user = new SharedPrefManager(this).getUser();
-        if (status.equals("ACCEPTED")) {
+
+        if (newStatus.equals("ACCEPTED")) {
             // Validate Inputs
-            String loc = edtLocation.getText().toString().trim();
-            String note = edtNote.getText().toString().trim();
+            String loc = binding.edtMeetupLocation.getText().toString().trim();
+            String note = binding.edtSellerNote.getText().toString().trim();
 
             if (loc.isEmpty()) {
-                edtLocation.setError("Required");
+                binding.edtMeetupLocation.setError("Location is required");
                 return;
             }
 
@@ -164,20 +144,24 @@ public class TransactionDetailActivity extends AppCompatActivity {
             currentTransaction.setSellerNote(note);
         }
 
-        // Send Update
-        currentTransaction.setStatus(status);
+        // Update local object status
+        currentTransaction.setStatus(newStatus);
 
-        ApiUtils.getTransactionService().updateTransaction(user.getToken(),transactionId, currentTransaction).enqueue(new Callback<Transaction>() {
+        // Send to Server
+        ApiUtils.getTransactionService().updateTransaction(user.getToken(), transactionId, currentTransaction).enqueue(new Callback<Transaction>() {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(TransactionDetailActivity.this, "Updated!", Toast.LENGTH_SHORT).show();
 
-                    if (status.equals("ACCEPTED")) {
+                    if (newStatus.equals("ACCEPTED")) {
                         markItemAsSold(currentTransaction.getItemId());
                     } else {
-                        finish(); // Close page if rejected
+                        finish(); // Close if rejected
                     }
+
+                    // Refresh UI to show the new state (Accepted info)
+                    updateUI();
                 }
             }
             @Override
@@ -188,7 +172,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
     }
 
     private void markItemAsSold(int itemId) {
-        // Create a temporary item object just to update status
+        // Only update the status field
         Item updateItem = new Item();
         updateItem.setStatus("SOLD");
 
@@ -196,11 +180,33 @@ public class TransactionDetailActivity extends AppCompatActivity {
         ApiUtils.getItemService().updateItem(user.getToken(), itemId, updateItem).enqueue(new Callback<Item>() {
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
-                Toast.makeText(TransactionDetailActivity.this, "Deal Closed!", Toast.LENGTH_LONG).show();
-                finish();
+                Toast.makeText(TransactionDetailActivity.this, "Item marked as SOLD", Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onFailure(Call<Item> call, Throwable t) { }
         });
+    }
+
+    private void sendNotificationToBuyer(Transaction transaction) {
+        // 1. Prepare Notification
+        Notification notif = new Notification();
+        notif.setSenderId(transaction.getSellerId());
+        notif.setReceiverId(transaction.getBuyerId()); // Send to BUYER
+        notif.setTransactionId(transaction.getTransactionId());
+        notif.setEventId("SALE_ACCEPTED"); // The new event type
+        notif.setTitle("Offer Accepted!");
+        notif.setRead(false);
+
+        // 2. Send via API
+        User user = new SharedPrefManager(this).getUser();
+        ApiUtils.getNotificationService().createNotification(user.getToken(), notif)
+                .enqueue(new Callback<Notification>() {
+                    @Override
+                    public void onResponse(Call<Notification> call, Response<Notification> response) {
+                        // Log.d("NOTIF", "Sent to buyer");
+                    }
+                    @Override
+                    public void onFailure(Call<Notification> call, Throwable t) { }
+                });
     }
 }

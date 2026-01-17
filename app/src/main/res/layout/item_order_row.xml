@@ -51,12 +51,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PENDING"
-            android:textSize="12sp"
-            android:background="#FFF3E0"
-            android:textColor="#E65100"
-            android:paddingHorizontal="8dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:textStyle="bold"/>
+            android:gravity="center"
+            android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

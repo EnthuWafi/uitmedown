@@ -12,15 +12,14 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.model.MyNotificationResponse;
 import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.User;
-import com.enth.uitmedown.presentation.adapter.NotificationAdapter;
+import com.enth.uitmedown.presentation.adapter.MyNotificationAdapter;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,12 +50,11 @@ public class NotificationActivity extends AppCompatActivity {
         SharedPrefManager spm = new SharedPrefManager(this);
         User user = spm.getUser();
 
-        ApiUtils.getNotificationService().getNotificationsByReceiverId(user.getToken(), user.getId()).enqueue(new Callback<List<Notification>>() {
+        ApiUtils.getNotificationService().getNotificationsByReceiverId(user.getToken(), user.getId()).enqueue(new Callback<List<MyNotificationResponse>>() {
             @Override
-            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+            public void onResponse(Call<List<MyNotificationResponse>> call, Response<List<MyNotificationResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Setup Adapter
-                    NotificationAdapter adapter = new NotificationAdapter(
+                    MyNotificationAdapter adapter = new MyNotificationAdapter(
                             NotificationActivity.this,
                             response.body(),
                             notification -> {
@@ -73,7 +71,7 @@ public class NotificationActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Notification>> call, Throwable t) {
+            public void onFailure(Call<List<MyNotificationResponse>> call, Throwable t) {
                 Toast.makeText(NotificationActivity.this, "Error loading notifications", Toast.LENGTH_SHORT).show();
             }
         });

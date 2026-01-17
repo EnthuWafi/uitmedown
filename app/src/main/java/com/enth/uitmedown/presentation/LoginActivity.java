@@ -16,6 +16,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.databinding.ActivityLoginBinding;
 import com.enth.uitmedown.model.FailLogin;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
@@ -29,6 +30,7 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private ActivityLoginBinding binding;
     private EditText edtUsername;
     private EditText edtPassword;
     private SharedPrefManager spm;
@@ -37,34 +39,34 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. AUTO-LOGIN CHECK (Before loading UI)
-        spm = new SharedPrefManager(this);
-        if (spm.isLoggedIn()) {
-            User user = spm.getUser();
-            redirectUser(user); // Helper method to handle routing
-            return; // Stop execution here
-        }
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
 
         // 2. Load UI if not logged in
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);
+        setContentView(binding.getRoot());
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.login, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        edtUsername = findViewById(R.id.edtUsername);
-        edtPassword = findViewById(R.id.edtPassword);
+        edtUsername = binding.edtUsername;
+        edtPassword = binding.edtPassword;
 
-        Button btnLogin = findViewById(R.id.btnLogin);
+        Button btnLogin = binding.btnLogin;
         btnLogin.setOnClickListener(v -> loginClicked(v));
 
-        // Setup Register Link Click
-        findViewById(R.id.textViewRegister).setOnClickListener(v -> {
+        binding.textViewRegister.setOnClickListener(v -> {
             // startActivity(new Intent(this, RegisterActivity.class));
         });
+
+        spm = new SharedPrefManager(this);
+        if (spm.isLoggedIn()) {
+            validateSession(spm.getUser());
+        } else {
+            showLoginForm();
+        }
     }
 
     public void loginClicked(View view) {
@@ -79,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
     private void doLogin(String username, String password) {
         UserService userService = ApiUtils.getUserService();
         Call<User> call;
+        showLoading();
 
         if (username.contains("@")) {
             call = userService.loginEmail(username, password);
@@ -101,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                         redirectUser(user);
                     } else {
                         displayToast("Login error: Empty response");
+                        showLoginForm();
                     }
                 } else {
                     // Handle Errors
@@ -111,6 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         Log.e("MyApp:", e.toString());
                         displayToast("Login Failed");
+                        showLoginForm();
                     }
                 }
             }
@@ -119,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 displayToast("Error connecting to server.");
                 Log.e("MyApp:", t.toString());
+                showLoginForm();
             }
         });
     }
@@ -160,4 +166,43 @@ public class LoginActivity extends AppCompatActivity {
     public void displayToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
+
+    private void validateSession(User user) {
+        showLoading();
+
+        ApiUtils.getUserService().getUser(user.getToken(), user.getId()).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+
+                    if(response.body() != null) spm.storeUser(response.body());
+
+                    redirectUser(user);
+                } else {
+                    displayToast("Session expired. Please login again.");
+                    spm.logout(); // Clear bad data
+                    showLoginForm(); // Let them login again
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                displayToast("Network error. Could not verify session.");
+                showLoginForm();
+            }
+        });
+    }
+
+    private void showLoading() {
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.cardContainer.setVisibility(View.GONE);
+        binding.textViewRegister.setVisibility(View.GONE);
+    }
+
+    private void showLoginForm() {
+        binding.progressBar.setVisibility(View.GONE);
+        binding.cardContainer.setVisibility(View.VISIBLE);
+        binding.textViewRegister.setVisibility(View.VISIBLE);
+    }
+
 }
