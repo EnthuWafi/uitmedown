@@ -41,16 +41,16 @@ public class RequestsActivity extends AppCompatActivity {
 
         spm = new SharedPrefManager(this);
 
-        if (!spm.isLoggedIn()) {
-            finish();
-            return;
-        }
-
         NavigationUtils.setupBottomNav(this);
 
         rvSelling = findViewById(R.id.rvSelling);
         rvSelling.setLayoutManager(new LinearLayoutManager(this));
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadIncomingRequests();
     }
 

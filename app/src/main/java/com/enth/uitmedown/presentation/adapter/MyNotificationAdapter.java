@@ -36,7 +36,7 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
 
 
     public interface OnItemClickListener {
-        void onItemClick(MyNotificationResponse notif);
+        void onItemClick(MyNotificationResponse notif, int position);
     }
 
     public MyNotificationAdapter(Context context, List<MyNotificationResponse> notificationList, OnItemClickListener listener) {
@@ -70,14 +70,19 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
         holder.tvDate.setText(getRelativeTime(notif.getCreatedAt()));
 
         // 4. Read/Unread Status
-        if (notif.isRead()) {
+        if (notif.getIsRead() == 1) {
             holder.imgIcon.setColorFilter(ContextCompat.getColor(context, R.color.textInactive), PorterDuff.Mode.SRC_IN);
         } else {
             holder.imgIcon.setColorFilter(ContextCompat.getColor(context, R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
         }
 
-        // 5. Click
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(notif));
+        holder.itemView.setOnClickListener(v -> {
+            int currentPosition = holder.getBindingAdapterPosition();
+
+            if (currentPosition != RecyclerView.NO_POSITION) {
+                listener.onItemClick(notificationList.get(currentPosition), currentPosition);
+            }
+        });
     }
 
     @Override

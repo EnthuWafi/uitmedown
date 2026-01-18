@@ -2,6 +2,7 @@ package com.enth.uitmedown.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -11,19 +12,24 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.databinding.ActivityProfileBinding;
 import com.enth.uitmedown.model.User;
+import com.enth.uitmedown.remote.RetrofitClient;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
 import com.enth.uitmedown.utils.NavigationUtils;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    private ActivityProfileBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        binding = ActivityProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -36,30 +42,49 @@ public class ProfileActivity extends AppCompatActivity {
         SharedPrefManager spm = new SharedPrefManager(this);
         User user = spm.getUser();
 
-        TextView tvName = findViewById(R.id.tvUsername);
-        TextView tvEmail = findViewById(R.id.tvEmail);
+        TextView tvName = binding.tvUsername;
+        TextView tvEmail = binding.tvEmail;
 
-        if (user != null) {
-            tvName.setText(user.getUsername());
-            tvEmail.setText(user.getEmail());
+        tvName.setText(user.getUsername());
+        tvEmail.setText(user.getEmail());
 
+        if (user.getPictureFile() != null && user.getPictureFile().getFile() != null) {
+            String serverPath = user.getPictureFile().getFile();
+
+            String fullUrl = RetrofitClient.BASE_URL + serverPath;
+
+            Glide.with(this).load(fullUrl).into(binding.imgProfile);
         }
 
-        // 3. Button Logic
+        // 3. EDIT PROFILE LOGIC
+        binding.btnEditProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EditProfileActivity.class);
+            intent.putExtra("USER_DATA", user);
+            startActivity(intent);
+        });
+
+        if ("admin".equalsIgnoreCase(user.getRole()) || "superadmin".equalsIgnoreCase(user.getRole())) {
+            binding.btnAdminDashboard.setVisibility(View.VISIBLE);
+            binding.btnAdminDashboard.setOnClickListener(v -> {
+                startActivity(new Intent(this, AdminMainActivity.class));
+            });
+        } else {
+            binding.btnAdminDashboard.setVisibility(View.GONE);
+        }
 
         // Option A: Buying
-        findViewById(R.id.btnMyOrders).setOnClickListener(v -> {
+        binding.btnMyOrders.setOnClickListener(v -> {
             startActivity(new Intent(ProfileActivity.this, MyOrdersActivity.class));
         });
 
         // Option B: Selling
-        findViewById(R.id.btnSalesRequests).setOnClickListener(v -> {
+        binding.btnSalesRequests.setOnClickListener(v -> {
 
             startActivity(new Intent(ProfileActivity.this, RequestsActivity.class));
         });
 
         // Logout
-        Button btnLogout = findViewById(R.id.btnLogout);
+        Button btnLogout = binding.btnLogout;
         btnLogout.setOnClickListener(v -> {
             spm.logout();
             Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);

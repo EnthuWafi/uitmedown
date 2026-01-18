@@ -44,6 +44,7 @@
     <string name="my_listings">My Listings</string>
     <string name="in_requests">Incoming Requests</string>
     <string name="profile">Profile</string>
+    <string name="back">Back</string>
 
 
 </resources>

@@ -17,6 +17,7 @@ import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.presentation.adapter.ItemAdapter;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
+import com.enth.uitmedown.utils.GridUtils;
 import com.enth.uitmedown.utils.NavigationUtils;
 import java.util.List;
 import retrofit2.Call;
@@ -43,8 +44,18 @@ public class MyListingsActivity extends AppCompatActivity {
 
         // 2. Setup Recycler View (Grid Mode)
         rvListings = findViewById(R.id.rvMyListings);
-        rvListings.setLayoutManager(new GridLayoutManager(this, 2));
+        setupRecyclerView();
+    }
 
+    private void setupRecyclerView() {
+        int numberOfColumns = GridUtils.calculateNoOfColumns(this, 180);
+
+        rvListings.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadMyItems();
     }
 

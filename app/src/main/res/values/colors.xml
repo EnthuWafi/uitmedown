@@ -21,4 +21,5 @@
 
     <color name="status_rejected_bg">#FFEBEE</color>
     <color name="status_rejected_text">#C62828</color>
+    <color name="colorAccentTwo">#F44336</color>
 </resources>

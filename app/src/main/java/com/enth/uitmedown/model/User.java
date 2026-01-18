@@ -28,11 +28,14 @@ public class User implements Serializable  {
     @SerializedName("secret")
     private String secret;
 
-    @SerializedName("user_detail")
-    private UserDetail userDetail;
+    @SerializedName("phone_number")
+    private String phoneNumber;
 
-    @SerializedName("user_detail_id")
-    private int userDetailId;
+    @SerializedName("picture_file_id")
+    private int pictureFileId;
+
+    @SerializedName("picture_file")
+    private FileModel pictureFile;
 
     public int getId() {
         return id;
@@ -106,20 +109,27 @@ public class User implements Serializable  {
         this.secret = secret;
     }
 
-
-    public UserDetail getUserDetail() {
-        return userDetail;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setUserDetail(UserDetail userDetail) {
-        this.userDetail = userDetail;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
-    public int getUserDetailId() {
-        return userDetailId;
+    public int getPictureFileId() {
+        return pictureFileId;
     }
 
-    public void setUserDetailId(int userDetailId) {
-        this.userDetailId = userDetailId;
+    public void setPictureFileId(int pictureFileId) {
+        this.pictureFileId = pictureFileId;
+    }
+
+    public FileModel getPictureFile() {
+        return pictureFile;
+    }
+
+    public void setPictureFile(FileModel pictureFile) {
+        this.pictureFile = pictureFile;
     }
 }

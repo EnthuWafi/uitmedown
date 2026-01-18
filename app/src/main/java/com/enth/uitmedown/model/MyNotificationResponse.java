@@ -43,5 +43,11 @@ public class MyNotificationResponse implements Serializable {
     public String getItemTitle() { return (itemTitle != null) ? itemTitle : "Item"; }
     public String getTemplateText() { return (templateText != null) ? templateText : ""; }
 
-    public boolean isRead() { return isRead != null && isRead == 1; }
+    public Integer getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(Integer isRead) {
+        this.isRead = isRead;
+    }
 }

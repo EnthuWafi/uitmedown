@@ -1,7 +1,9 @@
 package com.enth.uitmedown.presentation;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -11,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +24,7 @@ import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.remote.ItemService;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
+import com.enth.uitmedown.utils.GridUtils;
 import com.enth.uitmedown.utils.NavigationUtils;
 
 import java.util.List;
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 2. Setup UI
         rvItems = findViewById(R.id.rvItems);
-        rvItems.setLayoutManager(new LinearLayoutManager(this));
+        setupRecyclerView();
 
         findViewById(R.id.btnNotifications).setOnClickListener(v -> {
             doOpenNotification();
@@ -61,6 +65,12 @@ public class MainActivity extends AppCompatActivity {
 
         itemService = ApiUtils.getItemService();
 
+    }
+
+    private void setupRecyclerView() {
+        int numberOfColumns = GridUtils.calculateNoOfColumns(this, 180);
+
+        rvItems.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
     }
 
     /**

@@ -56,7 +56,11 @@ public class MyOrdersActivity extends AppCompatActivity {
         // 3. Back Button
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // 4. Fetch Data
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadOrders();
     }
 

@@ -57,13 +57,22 @@ public class NotificationActivity extends AppCompatActivity {
                     MyNotificationAdapter adapter = new MyNotificationAdapter(
                             NotificationActivity.this,
                             response.body(),
-                            notification -> {
-                                // ON CLICK LOGIC
+                            (notification, position) -> {
+
                                 if ("BUY_REQUEST".equals(notification.getEventId())) {
                                     Intent intent = new Intent(NotificationActivity.this, TransactionDetailActivity.class);
                                     intent.putExtra("TRANSACTION_ID", notification.getTransactionId());
                                     startActivity(intent);
                                 }
+
+                                notification.setIsRead(1);
+
+                                if (rvNotifs.getAdapter() != null) {
+                                    rvNotifs.getAdapter().notifyItemChanged(position);
+                                }
+
+                                updateNotificationRead(notification);
+
                             }
                     );
                     rvNotifs.setAdapter(adapter);
@@ -74,6 +83,25 @@ public class NotificationActivity extends AppCompatActivity {
             public void onFailure(Call<List<MyNotificationResponse>> call, Throwable t) {
                 Toast.makeText(NotificationActivity.this, "Error loading notifications", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void updateNotificationRead(MyNotificationResponse notification) {
+        SharedPrefManager spm = new SharedPrefManager(this);
+        User user = spm.getUser();
+
+        ApiUtils.getNotificationService().updateNotificationStatus(
+                user.getToken(), notification.getNotificationId(),
+                1).enqueue(new Callback<Notification>() {
+            @Override
+            public void onResponse(Call<Notification> call, Response<Notification> response) {
+                if (response.isSuccessful()){
+                    Toast.makeText(NotificationActivity.this, "Notification marked as read", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Notification> call, Throwable t) { }
         });
     }
 }

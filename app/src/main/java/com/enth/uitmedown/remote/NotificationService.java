@@ -10,6 +10,8 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -39,6 +41,14 @@ public interface NotificationService {
 
     @PUT("notifications/{id}")
     Call<Notification> updateNotification(@Header("api_key") String apiKey, @Path("id") int id, @Body Notification notification);
+
+    @FormUrlEncoded
+    @PUT("notifications/{id}")
+    Call<Notification> updateNotificationStatus(
+            @Header("api_key") String token,
+            @Path("id") int id,
+            @Field("is_read") int isRead
+    );
 
     @DELETE("notifications/{id}")
     Call<DeleteResponse> deleteNotification(@Header("api_key") String apiKey, @Path("id") int id);

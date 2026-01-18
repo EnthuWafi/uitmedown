@@ -193,9 +193,9 @@ public class TransactionDetailActivity extends AppCompatActivity {
         notif.setSenderId(transaction.getSellerId());
         notif.setReceiverId(transaction.getBuyerId()); // Send to BUYER
         notif.setTransactionId(transaction.getTransactionId());
-        notif.setEventId("SALE_ACCEPTED"); // The new event type
+        notif.setEventId("SALE_ACCEPTED");
         notif.setTitle("Offer Accepted!");
-        notif.setRead(false);
+        notif.setIsRead(0);
 
         // 2. Send via API
         User user = new SharedPrefManager(this).getUser();

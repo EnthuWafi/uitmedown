@@ -123,12 +123,12 @@ public class Notification implements Serializable {
         this.transaction = transaction;
     }
 
-    public Boolean getRead() {
-        return isRead != null && isRead == 1;
+    public Integer getIsRead() {
+        return isRead;
     }
 
-    public void setRead(Boolean read) {
-        this.isRead = (read ? 1 : 0);
+    public void setIsRead(Integer read) {
+        this.isRead = read;
     }
 
     public String getCreatedAt() {
