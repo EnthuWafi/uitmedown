@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -16,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.databinding.ActivityProfileBinding;
 import com.enth.uitmedown.model.User;
+import com.enth.uitmedown.model.UserRole;
 import com.enth.uitmedown.remote.RetrofitClient;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
 import com.enth.uitmedown.utils.NavigationUtils;
@@ -63,7 +67,8 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        if ("admin".equalsIgnoreCase(user.getRole()) || "superadmin".equalsIgnoreCase(user.getRole())) {
+        if (UserRole.ADMIN.getRoleName().equalsIgnoreCase(user.getRole()) ||
+                UserRole.SUPERADMIN.getRoleName().equalsIgnoreCase(user.getRole())) {
             binding.btnAdminDashboard.setVisibility(View.VISIBLE);
             binding.btnAdminDashboard.setOnClickListener(v -> {
                 startActivity(new Intent(this, AdminMainActivity.class));
@@ -72,12 +77,10 @@ public class ProfileActivity extends AppCompatActivity {
             binding.btnAdminDashboard.setVisibility(View.GONE);
         }
 
-        // Option A: Buying
         binding.btnMyOrders.setOnClickListener(v -> {
             startActivity(new Intent(ProfileActivity.this, MyOrdersActivity.class));
         });
 
-        // Option B: Selling
         binding.btnSalesRequests.setOnClickListener(v -> {
 
             startActivity(new Intent(ProfileActivity.this, RequestsActivity.class));
@@ -91,5 +94,20 @@ public class ProfileActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear stack
             startActivity(intent);
         });
+
+        binding.btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChangePasswordActivity.class);
+            changePassLauncher.launch(intent);
+        });
     }
+
+    private final ActivityResultLauncher<Intent> changePassLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    String msg = result.getData().getStringExtra("MESSAGE");
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                }
+            }
+    );
 }

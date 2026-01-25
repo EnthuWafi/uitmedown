@@ -92,6 +92,8 @@ public class CreateItemActivity extends AppCompatActivity {
                 handleSubmit();
             }
         });
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
     }
 
     private void setupEditModeUI() {

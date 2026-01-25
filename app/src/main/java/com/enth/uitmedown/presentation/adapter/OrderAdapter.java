@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.enth.uitmedown.R;
 import com.enth.uitmedown.model.Transaction;
@@ -19,7 +20,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private List<Transaction> orderList;
     private OnItemClickListener listener; // Listener Interface
 
-    // 1. Interface for Click Handling
     public interface OnItemClickListener {
         void onItemClick(Transaction transaction);
     }
@@ -42,8 +42,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = orderList.get(position);
 
-        // --- Data Binding ---
-        // Safety Check: If item object is null (due to API limits), show ID
         if (transaction.getItem() != null) {
             holder.tvItemName.setText(transaction.getItem().getTitle());
         } else {
@@ -52,7 +50,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.tvPrice.setText("RM " + String.format("%.2f", transaction.getAmount()));
 
-        // --- Status Logic (Color Coding) ---
         String status = transaction.getStatus() != null ? transaction.getStatus().toUpperCase() : "PENDING";
         holder.tvStatus.setText(status);
 
@@ -60,30 +57,33 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         switch (status) {
             case "ACCEPTED":
-                sideBarColor = Color.parseColor("#4CAF50"); // Green
-                textColor = Color.parseColor("#1B5E20");    // Dark Green Text
-                bgColor = Color.parseColor("#E8F5E9");      // Light Green BG
+                // Green Theme
+                sideBarColor = ContextCompat.getColor(context, R.color.status_accepted_text);
+                textColor    = ContextCompat.getColor(context, R.color.status_accepted_text);
+                bgColor      = ContextCompat.getColor(context, R.color.status_accepted_bg);
                 break;
+
             case "REJECTED":
-                sideBarColor = Color.parseColor("#F44336"); // Red
-                textColor = Color.parseColor("#B71C1C");    // Dark Red Text
-                bgColor = Color.parseColor("#FFEBEE");      // Light Red BG
+                // Red Theme
+                sideBarColor = ContextCompat.getColor(context, R.color.colorAccentTwo);
+                textColor    = ContextCompat.getColor(context, R.color.status_rejected_text);
+                bgColor      = ContextCompat.getColor(context, R.color.status_rejected_bg);
                 break;
+
             default: // PENDING
-                sideBarColor = Color.parseColor("#FF9800"); // Orange
-                textColor = Color.parseColor("#E65100");    // Dark Orange Text
-                bgColor = Color.parseColor("#FFF3E0");      // Light Orange BG
+                // Orange Theme
+                sideBarColor = ContextCompat.getColor(context, R.color.status_pending_text);
+                textColor    = ContextCompat.getColor(context, R.color.status_pending_text);
+                bgColor      = ContextCompat.getColor(context, R.color.status_pending_bg);
                 break;
         }
 
-        // Apply Colors
         holder.statusColor.setBackgroundColor(sideBarColor);
         holder.tvStatus.setTextColor(textColor);
 
-        // Make the status badge rounded programmatically
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
-        shape.setCornerRadius(16f); // Rounded corners
+        shape.setCornerRadius(16f);
         shape.setColor(bgColor);
         holder.tvStatus.setBackground(shape);
 

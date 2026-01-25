@@ -45,6 +45,7 @@
     <string name="in_requests">Incoming Requests</string>
     <string name="profile">Profile</string>
     <string name="back">Back</string>
+    <string name="registration">Registration</string>
 
 
 </resources>

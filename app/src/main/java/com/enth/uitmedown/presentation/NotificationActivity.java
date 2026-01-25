@@ -59,10 +59,16 @@ public class NotificationActivity extends AppCompatActivity {
                             response.body(),
                             (notification, position) -> {
 
-                                if ("BUY_REQUEST".equals(notification.getEventId())) {
-                                    Intent intent = new Intent(NotificationActivity.this, TransactionDetailActivity.class);
-                                    intent.putExtra("TRANSACTION_ID", notification.getTransactionId());
-                                    startActivity(intent);
+                                if (notification.getTransactionId() != null) {
+                                    if ("BUY_REQUEST".equals(notification.getEventId())) {
+                                        Intent intent = new Intent(NotificationActivity.this, TransactionDetailActivity.class);
+                                        intent.putExtra("TRANSACTION_ID", notification.getTransactionId());
+                                        startActivity(intent);
+                                    }
+                                }
+                                else{
+                                    Toast.makeText(NotificationActivity.this,
+                                            "Seems this transaction no longer exists!", Toast.LENGTH_SHORT).show();
                                 }
 
                                 notification.setIsRead(1);

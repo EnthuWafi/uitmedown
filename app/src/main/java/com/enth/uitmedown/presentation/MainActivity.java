@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvItems;
     private ItemService itemService;
 
-    SharedPrefManager spm;
+    private SharedPrefManager spm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

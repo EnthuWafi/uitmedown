@@ -1,5 +1,6 @@
 package com.enth.uitmedown.presentation;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.enth.uitmedown.R;
 import com.enth.uitmedown.databinding.ActivityLoginBinding;
 import com.enth.uitmedown.model.FailLogin;
 import com.enth.uitmedown.model.User;
+import com.enth.uitmedown.model.UserRole;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.remote.UserService;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
@@ -58,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> loginClicked(v));
 
         binding.textViewRegister.setOnClickListener(v -> {
-            // startActivity(new Intent(this, RegisterActivity.class));
+            startActivity(new Intent(this, RegisterActivity.class));
         });
 
         spm = new SharedPrefManager(this);
@@ -67,6 +69,10 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             showLoginForm();
         }
+
+        binding.textViewForgotPassword.setOnClickListener(v -> {
+            showForgotPasswordDialog();
+        });
     }
 
     public void loginClicked(View view) {
@@ -135,15 +141,7 @@ public class LoginActivity extends AppCompatActivity {
     private void redirectUser(User user) {
         Intent intent;
 
-        // CHECK ROLE
-        if ("admin".equalsIgnoreCase(user.getRole())) {
-            // If admin, go to Admin Dashboard
-            intent = new Intent(LoginActivity.this, AdminMainActivity.class);
-            // displayToast("Welcome Admin");
-        } else {
-            // If normal user, go to Main Activity
-            intent = new Intent(LoginActivity.this, MainActivity.class);
-        }
+        intent = new Intent(LoginActivity.this, MainActivity.class);
 
         // Clear the back stack so pressing 'Back' doesn't return to Login
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -197,12 +195,40 @@ public class LoginActivity extends AppCompatActivity {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.cardContainer.setVisibility(View.GONE);
         binding.textViewRegister.setVisibility(View.GONE);
+        binding.textViewForgotPassword.setVisibility(View.GONE);
     }
 
     private void showLoginForm() {
         binding.progressBar.setVisibility(View.GONE);
         binding.cardContainer.setVisibility(View.VISIBLE);
         binding.textViewRegister.setVisibility(View.VISIBLE);
+        binding.textViewForgotPassword.setVisibility(View.VISIBLE);
+    }
+
+    private void showForgotPasswordDialog() {
+        View view = getLayoutInflater().inflate(R.layout.dialog_forgot_password, null);
+
+        EditText resetMail = view.findViewById(R.id.edtResetEmail);
+        new AlertDialog.Builder(this)
+                .setView(view)
+                .setPositiveButton("Send", (dialog, which) -> {
+                    String email = resetMail.getText().toString();
+                    // Call API
+                    ApiUtils.getUserService().forgotPassword(email).enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, Response<User> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(LoginActivity.this, "Reset link sent!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Email not found", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {}
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
 }
