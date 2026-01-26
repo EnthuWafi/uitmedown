@@ -14,6 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UiTMeDown">
         <activity
+            android:name=".presentation.AdminAuditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.AdminAddUserActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.RegisterActivity"
             android:exported="false" />
         <activity

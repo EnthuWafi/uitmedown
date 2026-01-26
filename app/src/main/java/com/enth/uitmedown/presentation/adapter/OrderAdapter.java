@@ -18,17 +18,31 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private Context context;
     private List<Transaction> orderList;
-    private OnItemClickListener listener; // Listener Interface
+    private OnItemClickListener listener;
+    private boolean isAdminView = false;
+
+    public void updateList(List<Transaction> list) {
+        this.orderList = list;
+        this.notifyDataSetChanged();
+    }
 
     public interface OnItemClickListener {
         void onItemClick(Transaction transaction);
     }
 
-    // 2. Constructor accepts the listener
     public OrderAdapter(Context context, List<Transaction> orderList, OnItemClickListener listener) {
         this.context = context;
         this.orderList = orderList;
         this.listener = listener;
+        this.isAdminView = false;
+    }
+
+    // Constructor 2: For Admin Audit
+    public OrderAdapter(Context context, List<Transaction> orderList, OnItemClickListener listener, boolean isAdminView) {
+        this.context = context;
+        this.orderList = orderList;
+        this.listener = listener;
+        this.isAdminView = isAdminView;
     }
 
     @NonNull
@@ -42,12 +56,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = orderList.get(position);
 
-        if (transaction.getItem() != null) {
-            holder.tvItemName.setText(transaction.getItem().getTitle());
+        String displayTitle;
+        String itemName = (transaction.getItem() != null) ? transaction.getItem().getTitle() : "Item #" + transaction.getItemId();
+
+        if (isAdminView) {
+            // Admin sees "ID #405 item name"
+            displayTitle = "ID #" + transaction.getTransactionId() + " • " + itemName;
         } else {
-            holder.tvItemName.setText("Item #" + transaction.getItemId());
+            // User sees "item name"
+            displayTitle = itemName;
         }
 
+        holder.tvItemName.setText(displayTitle);
         holder.tvPrice.setText("RM " + String.format("%.2f", transaction.getAmount()));
 
         String status = transaction.getStatus() != null ? transaction.getStatus().toUpperCase() : "PENDING";

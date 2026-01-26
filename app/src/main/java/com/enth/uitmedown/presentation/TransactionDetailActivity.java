@@ -10,13 +10,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.enth.uitmedown.databinding.ActivityTransactionDetailBinding; // Generated automatically
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.Transaction;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.remote.ApiUtils;
+import com.enth.uitmedown.remote.RetrofitClient;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
+import com.enth.uitmedown.utils.NavigationUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +36,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        // 1. Inflate Binding
+
         binding = ActivityTransactionDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -45,12 +48,10 @@ public class TransactionDetailActivity extends AppCompatActivity {
 
         transactionId = getIntent().getIntExtra("TRANSACTION_ID", -1);
         if (transactionId == -1) {
-            Toast.makeText(this, "Error: No ID provided", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 2. Load Data
         loadTransactionDetails();
     }
 
@@ -66,6 +67,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
                     Toast.makeText(TransactionDetailActivity.this, "Failed to load details", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(Call<Transaction> call, Throwable t) {
                 Toast.makeText(TransactionDetailActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
@@ -74,7 +76,7 @@ public class TransactionDetailActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        // --- 1. Populate Basic Info ---
+
         if (currentTransaction.getItem() != null) {
             binding.tvItemTitle.setText(currentTransaction.getItem().getTitle());
         }
@@ -85,19 +87,38 @@ public class TransactionDetailActivity extends AppCompatActivity {
 
         // --- 2. Identify Roles ---
         int myId = new SharedPrefManager(this).getUser().getId();
-        boolean isSeller = (myId == currentTransaction.getSellerId());
+        boolean isSeller = (myId == currentTransaction.getItem().getSellerId());
 
+        User otherParty;
         if (isSeller) {
-            String buyerName = (currentTransaction.getBuyer() != null) ? currentTransaction.getBuyer().getUsername() : "Unknown";
+            otherParty = currentTransaction.getBuyer();
+            String buyerName = (otherParty != null) ? otherParty.getUsername() : "Unknown";
             binding.tvOtherPartyName.setText("Buyer: " + buyerName);
         } else {
-            String sellerName = (currentTransaction.getSeller() != null) ? currentTransaction.getSeller().getUsername() : "Unknown";
+            otherParty = currentTransaction.getItem().getSeller();
+            String sellerName = (otherParty != null) ? otherParty.getUsername() : "Unknown";
             binding.tvOtherPartyName.setText("Seller: " + sellerName);
         }
+        //glide
 
-        // --- 3. VISIBILITY LOGIC ---
+        if (currentTransaction.getItem() != null && currentTransaction.getItem().getFile() != null) {
+            String fullUrl = RetrofitClient.BASE_URL + currentTransaction.getItem().getFile().getFile();
 
-        // Hide everything first, then show what's needed
+            Glide.with(this)
+                    .load(fullUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .into(binding.imgItemImage);
+        }
+
+        //whatsapp
+        binding.btnWhatsApp.setOnClickListener(v -> {
+            if (otherParty != null && otherParty.getPhoneNumber() != null) {
+                NavigationUtils.openWhatsApp(this, otherParty.getPhoneNumber());
+            } else {
+                Toast.makeText(this, "No phone number available", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         binding.layoutSellerActions.setVisibility(View.GONE);
         binding.layoutMeetingInfo.setVisibility(View.GONE);
         binding.tvRejectedNotice.setVisibility(View.GONE);
@@ -115,13 +136,11 @@ public class TransactionDetailActivity extends AppCompatActivity {
         } else if (status.equals("PENDING")) {
             // PENDING STATE
             if (isSeller) {
-                // Seller can act
                 binding.layoutSellerActions.setVisibility(View.VISIBLE);
 
                 binding.btnAccept.setOnClickListener(v -> processDecision("ACCEPTED"));
                 binding.btnReject.setOnClickListener(v -> processDecision("REJECTED"));
             } else {
-                // Buyer waiting...
                 binding.tvHeaderStatus.setText("Status: Waiting for Seller response");
             }
         }
@@ -157,13 +176,13 @@ public class TransactionDetailActivity extends AppCompatActivity {
                     if (newStatus.equals("ACCEPTED")) {
                         markItemAsSold(currentTransaction.getItemId());
                     } else {
-                        finish(); // Close if rejected
+                        finish();
                     }
 
-                    // Refresh UI to show the new state (Accepted info)
                     updateUI();
                 }
             }
+
             @Override
             public void onFailure(Call<Transaction> call, Throwable t) {
                 Toast.makeText(TransactionDetailActivity.this, "Failed to update", Toast.LENGTH_SHORT).show();
@@ -180,33 +199,42 @@ public class TransactionDetailActivity extends AppCompatActivity {
         ApiUtils.getItemService().updateItem(user.getToken(), itemId, updateItem).enqueue(new Callback<Item>() {
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
-                Toast.makeText(TransactionDetailActivity.this, "Item marked as SOLD", Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    sendNotificationToBuyer(currentTransaction);
+                    Toast.makeText(TransactionDetailActivity.this, "Item marked as SOLD", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(TransactionDetailActivity.this, "Failed to update: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+
             }
+
             @Override
-            public void onFailure(Call<Item> call, Throwable t) { }
+            public void onFailure(Call<Item> call, Throwable t) {
+                Toast.makeText(TransactionDetailActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void sendNotificationToBuyer(Transaction transaction) {
-        // 1. Prepare Notification
         Notification notif = new Notification();
-        notif.setSenderId(transaction.getSellerId());
-        notif.setReceiverId(transaction.getBuyerId()); // Send to BUYER
+        notif.setSenderId(transaction.getItem().getSellerId());
+        notif.setReceiverId(transaction.getBuyerId());
         notif.setTransactionId(transaction.getTransactionId());
         notif.setEventId("SALE_ACCEPTED");
         notif.setTitle("Offer Accepted!");
         notif.setIsRead(0);
 
-        // 2. Send via API
         User user = new SharedPrefManager(this).getUser();
         ApiUtils.getNotificationService().createNotification(user.getToken(), notif)
                 .enqueue(new Callback<Notification>() {
                     @Override
                     public void onResponse(Call<Notification> call, Response<Notification> response) {
-                        // Log.d("NOTIF", "Sent to buyer");
                     }
+
                     @Override
-                    public void onFailure(Call<Notification> call, Throwable t) { }
+                    public void onFailure(Call<Notification> call, Throwable t) {
+                    }
                 });
     }
 }

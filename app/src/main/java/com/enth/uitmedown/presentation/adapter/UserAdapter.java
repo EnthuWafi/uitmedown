@@ -22,7 +22,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public interface OnUserActionListener {
         void onStatusChanged(User user, int newStatus);
-        void onUserLongClick(User user);
+        void onUserLongClick(User user, View view);
     }
 
     private Context context;
@@ -88,7 +88,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         });
 
         holder.itemView.setOnLongClickListener(v -> {
-            listener.onUserLongClick(user);
+            listener.onUserLongClick(user, v);
             return true;
         });
     }

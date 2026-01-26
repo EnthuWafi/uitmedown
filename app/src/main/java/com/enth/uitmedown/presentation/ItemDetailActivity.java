@@ -19,9 +19,11 @@ import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.Transaction;
 import com.enth.uitmedown.model.User;
+import com.enth.uitmedown.model.UserRole;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.remote.RetrofitClient;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
+import com.enth.uitmedown.utils.NavigationUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,6 +67,22 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
+        User seller = item.getSeller();
+
+        if (seller.getPictureFile() != null) {
+            String fullUrl = RetrofitClient.BASE_URL + seller.getPictureFile().getFile();
+            Glide.with(this).load(fullUrl).circleCrop().into(binding.imgSellerAvatar);
+        }
+
+        binding.btnWhatsApp.setOnClickListener(v -> {
+            String phone = seller.getPhoneNumber();
+            if (phone != null && !phone.isEmpty()) {
+                NavigationUtils.openWhatsApp(this, phone);
+            } else {
+                Toast.makeText(this, "Seller has no phone number", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         binding.tvDetailTitle.setText(item.getTitle());
         binding.tvDetailPrice.setText("RM " + item.getPrice());
         binding.tvDetailDesc.setText(item.getDescription());
@@ -73,28 +91,32 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         if (item.getFile() != null && item.getFile().getFile() != null) {
             String serverPath = item.getFile().getFile();
-
             String fullUrl = RetrofitClient.BASE_URL + serverPath;
-
             Glide.with(this).load(fullUrl).into(binding.imgDetail);
         }
     }
 
+
+
     private void setupLogic() {
-        int myUserId = spm.getUser().getId();
+        User user = spm.getUser();
+        int myUserId = user.getId();
         boolean isOwner = (myUserId == item.getSellerId());
         boolean isSold = "sold".equalsIgnoreCase(item.getStatus());
+        boolean isAdmin = UserRole.ADMIN.getRoleName().equalsIgnoreCase(user.getRole()) ||
+                UserRole.SUPERADMIN.getRoleName().equalsIgnoreCase(user.getRole());
 
-        // HIDE ALL INITIALLY
         binding.btnRequestBuy.setVisibility(View.GONE);
         binding.layoutSellerActions.setVisibility(View.GONE);
         binding.btnItemSold.setVisibility(View.GONE);
+        binding.btnBanItem.setVisibility(View.GONE);
+
 
         if (isSold) {
             // Case 1: Item is Sold
             binding.btnItemSold.setVisibility(View.VISIBLE);
         } else if (isOwner) {
-            // Case 2: I am the Owner -> Show Edit/Delete
+            // Case 2: I am the Owner so Show Edit and Delete
             binding.layoutSellerActions.setVisibility(View.VISIBLE);
 
             binding.btnDelete.setOnClickListener(v -> deleteItem());
@@ -103,10 +125,18 @@ public class ItemDetailActivity extends AppCompatActivity {
                 intent.putExtra("EDIT_ITEM", item);
                 startActivity(intent);
             });
-        } else {
-            // Case 3: I am a Buyer -> Show Buy Button
+        }
+        else {
+            // Case 3: I am a Buyer so Show Buy Button
             binding.btnRequestBuy.setVisibility(View.VISIBLE);
             binding.btnRequestBuy.setOnClickListener(v -> submitBuyRequest());
+        }
+
+        if (isAdmin) {
+            // I am an Admin so Show Ban
+            binding.btnBanItem.setVisibility(View.VISIBLE);
+
+            binding.btnBanItem.setOnClickListener(v -> deleteItem());
         }
     }
 
@@ -122,7 +152,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         Transaction newDeal = new Transaction();
         newDeal.setItemId(item.getItemId());
         newDeal.setBuyerId(myUserId);
-        newDeal.setSellerId(item.getSellerId());
         newDeal.setAmount(item.getPrice());
         newDeal.setStatus("pending");
 

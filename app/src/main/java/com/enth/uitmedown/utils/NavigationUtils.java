@@ -3,10 +3,12 @@ package com.enth.uitmedown.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -85,6 +87,26 @@ public class NavigationUtils {
         if (icon != null && text != null) {
             icon.setColorFilter(color);
             text.setTextColor(color);
+        }
+    }
+
+    public static void openWhatsApp(Activity activity, String phoneNumber) {
+        // Basic formatting for Malaysia (Remove leading 0, add 60)
+        // If your DB stores "012345", this makes it "6012345"
+        if (phoneNumber.startsWith("0")) {
+            phoneNumber = "60" + phoneNumber.substring(1);
+        }
+
+        // Clean formatting (remove dashes or spaces)
+        phoneNumber = phoneNumber.replaceAll("[^0-9]", "");
+
+        String url = "https://wa.me/" + phoneNumber;
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            activity.startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(activity, "WhatsApp not found", Toast.LENGTH_SHORT).show();
         }
     }
 }

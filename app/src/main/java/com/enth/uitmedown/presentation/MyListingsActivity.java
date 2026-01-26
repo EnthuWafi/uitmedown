@@ -39,10 +39,8 @@ public class MyListingsActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 1. Setup Navigation
         NavigationUtils.setupBottomNav(this);
 
-        // 2. Setup Recycler View (Grid Mode)
         rvListings = findViewById(R.id.rvMyListings);
         setupRecyclerView();
     }
@@ -65,10 +63,13 @@ public class MyListingsActivity extends AppCompatActivity {
         ApiUtils.getItemService().getItemsBySellerId(user.getToken(), user.getId()).enqueue(new Callback<List<Item>>() {
             @Override
             public void onResponse(Call<List<Item>> call, Response<List<Item>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // We reuse the standard ItemAdapter
-                    // If you want special buttons (Edit/Delete), you'd need a specific adapter later
-                    ItemAdapter adapter = new ItemAdapter(MyListingsActivity.this, response.body());
+                if (response.isSuccessful()) {
+                    List<Item> itemList = response.body();
+                    if (itemList == null) {
+                        itemList = List.of();
+                    }
+
+                    ItemAdapter adapter = new ItemAdapter(MyListingsActivity.this, itemList);
                     rvListings.setAdapter(adapter);
                 } else {
                     Toast.makeText(MyListingsActivity.this, "Failed to load items", Toast.LENGTH_SHORT).show();

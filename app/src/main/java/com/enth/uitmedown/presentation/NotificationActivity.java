@@ -16,10 +16,13 @@ import com.enth.uitmedown.model.MyNotificationResponse;
 import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.presentation.adapter.MyNotificationAdapter;
+import com.enth.uitmedown.presentation.adapter.NotificationAdapter;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,23 +47,27 @@ public class NotificationActivity extends AppCompatActivity {
         rvNotifs.setLayoutManager(new LinearLayoutManager(this));
 
         loadNotifications();
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
     }
 
     private void loadNotifications() {
         SharedPrefManager spm = new SharedPrefManager(this);
         User user = spm.getUser();
+        Map<String, String> map = new HashMap<>();
+        map.put("receiver_id", String.valueOf(user.getId()));
 
-        ApiUtils.getNotificationService().getNotificationsByReceiverId(user.getToken(), user.getId()).enqueue(new Callback<List<MyNotificationResponse>>() {
+        ApiUtils.getNotificationService().getNotifications(user.getToken(), map).enqueue(new Callback<List<Notification>>() {
             @Override
-            public void onResponse(Call<List<MyNotificationResponse>> call, Response<List<MyNotificationResponse>> response) {
+            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    MyNotificationAdapter adapter = new MyNotificationAdapter(
+                    NotificationAdapter adapter = new NotificationAdapter(
                             NotificationActivity.this,
                             response.body(),
                             (notification, position) -> {
 
                                 if (notification.getTransactionId() != null) {
-                                    if ("BUY_REQUEST".equals(notification.getEventId())) {
+                                    if ("BUY_REQUEST".equals(notification.getEventId()) || "SALE_ACCEPTED".equals(notification.getEventId())) {
                                         Intent intent = new Intent(NotificationActivity.this, TransactionDetailActivity.class);
                                         intent.putExtra("TRANSACTION_ID", notification.getTransactionId());
                                         startActivity(intent);
@@ -86,28 +93,25 @@ public class NotificationActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<MyNotificationResponse>> call, Throwable t) {
+            public void onFailure(Call<List<Notification>> call, Throwable t) {
                 Toast.makeText(NotificationActivity.this, "Error loading notifications", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void updateNotificationRead(MyNotificationResponse notification) {
+    private void updateNotificationRead(Notification notification) {
         SharedPrefManager spm = new SharedPrefManager(this);
         User user = spm.getUser();
 
-        ApiUtils.getNotificationService().updateNotificationStatus(
-                user.getToken(), notification.getNotificationId(),
-                1).enqueue(new Callback<Notification>() {
+        ApiUtils.getNotificationService().updateNotification(
+                user.getToken(), notification.getNotificationId(), notification).enqueue(new Callback<Notification>() {
             @Override
-            public void onResponse(Call<Notification> call, Response<Notification> response) {
-                if (response.isSuccessful()){
-                    Toast.makeText(NotificationActivity.this, "Notification marked as read", Toast.LENGTH_SHORT).show();
-                }
-            }
+            public void onResponse(Call<Notification> call, Response<Notification> response) { }
 
             @Override
-            public void onFailure(Call<Notification> call, Throwable t) { }
+            public void onFailure(Call<Notification> call, Throwable t) {
+                Toast.makeText(NotificationActivity.this, "Error marking notification as read", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

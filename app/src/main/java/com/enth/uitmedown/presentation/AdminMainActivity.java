@@ -1,5 +1,6 @@
 package com.enth.uitmedown.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -39,7 +41,7 @@ public class AdminMainActivity extends AppCompatActivity {
     private ActivityAdminMainBinding binding;
     private SharedPrefManager spm;
     private UserAdapter adapter;
-    private List<User> allUsers = new ArrayList<>(); // Keep a master copy for filtering
+    private List<User> allUsers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,14 @@ public class AdminMainActivity extends AppCompatActivity {
         setupRecyclerView();
         fetchAllUsers();
         setupSearch();
+
+        binding.btnAudit.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminAuditActivity.class))
+        );
+
+        binding.btnAdd.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminAddUserActivity.class))
+        );
     }
 
     private void setupRecyclerView() {
@@ -75,17 +85,79 @@ public class AdminMainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onUserLongClick(User targetUser) {
+            public void onUserLongClick(User targetUser, View view) {
                 User me = spm.getUser();
                 if (UserRole.SUPERADMIN.getRoleName().equalsIgnoreCase(me.getRole())) {
-                    showForceResetDialog(targetUser);
+                    showUserActionMenu(targetUser, view);
                 } else {
-                    Toast.makeText(AdminMainActivity.this, "Only Superadmins can force reset passwords.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AdminMainActivity.this, "Access Denied: Superadmin only.", Toast.LENGTH_SHORT).show();
                 }
             };
         });
 
         binding.rvUserList.setAdapter(adapter);
+    }
+
+    private void showUserActionMenu(User targetUser, View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+
+        // Add Menu Items Programmatically
+        // Menu.add(groupId, itemId, order, title)
+        popup.getMenu().add(0, 1, 0, "Force Reset Password");
+
+        boolean isTargetAdmin = UserRole.ADMIN.getRoleName().equalsIgnoreCase(targetUser.getRole());
+        if (isTargetAdmin) {
+            popup.getMenu().add(0, 2, 1, "Demote to User");
+        } else {
+            popup.getMenu().add(0, 3, 1, "Promote to Admin");
+        }
+        popup.getMenu().add(0, 4, 0, "Delete User");
+
+        // 3. Handle Clicks
+        popup.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    showForceResetDialog(targetUser);
+                    return true;
+                case 2:
+                    changeUserRole(targetUser, "user");
+                    return true;
+                case 3:
+                    changeUserRole(targetUser, "admin");
+                    return true;
+                case 4:
+                    deleteUser(targetUser);
+                    return true;
+                default:
+                    return false;
+            }
+        });
+
+        popup.show();
+    }
+
+    private void deleteUser(User targetUser) {
+        String token = spm.getUser().getToken();
+
+        ApiUtils.getUserService().deleteUser(token, targetUser.getId()).enqueue(new Callback<User>(){
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(AdminMainActivity.this, "User deleted", Toast.LENGTH_SHORT).show();
+                    allUsers.remove(targetUser);
+                    adapter.updateList(allUsers);
+                    adapter.notifyDataSetChanged();
+                }
+                else {
+                    Toast.makeText(AdminMainActivity.this, "Delete failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Toast.makeText(AdminMainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+            }
+
+        });
     }
 
     private void showForceResetDialog(User targetUser) {
@@ -165,17 +237,27 @@ public class AdminMainActivity extends AppCompatActivity {
 
     private void updateUserStatus(User user, int newStatus) {
         String token = spm.getUser().getToken();
-        user.setIsActive(newStatus);
 
-        ApiUtils.getUserService().updateUser(token, user.getId(), user)
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("is_active", newStatus);
+
+        //prevent deactivating greater authority
+        if (user.getRole().equalsIgnoreCase(UserRole.SUPERADMIN.getRoleName())) {
+            Toast.makeText(AdminMainActivity.this, "Can't deactivate superadmin", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ApiUtils.getUserService().updateUserField(token, user.getId(), updates)
                 .enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
                         if (response.isSuccessful()) {
                             String statusText = (newStatus == 1) ? "activated" : "banned";
                             Toast.makeText(AdminMainActivity.this, "User " + statusText, Toast.LENGTH_SHORT).show();
+                            user.setIsActive(newStatus);
                         } else {
-                            Toast.makeText(AdminMainActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AdminMainActivity.this, "Update failed: " + response.code(), Toast.LENGTH_SHORT).show();
+
                             user.setIsActive(newStatus == 1 ? 0 : 1);
                             adapter.notifyDataSetChanged();
                         }
@@ -184,10 +266,12 @@ public class AdminMainActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<User> call, Throwable t) {
                         Toast.makeText(AdminMainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+
+                        user.setIsActive(newStatus == 1 ? 0 : 1);
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }
-
     private void setupSearch() {
         binding.edtSearchUser.addTextChangedListener(new TextWatcher() {
             @Override
@@ -213,5 +297,30 @@ public class AdminMainActivity extends AppCompatActivity {
                     .collect(Collectors.toList());
             adapter.updateList(filteredList);
         }
+    }
+    private void changeUserRole(User targetUser, String newRole) {
+        String token = spm.getUser().getToken();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("role", newRole);
+
+        ApiUtils.getUserService().updateUserField(token, targetUser.getId(), updates)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(AdminMainActivity.this, "User role updated to " + newRole, Toast.LENGTH_SHORT).show();
+                            targetUser.setRole(newRole);
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(AdminMainActivity.this, "Failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        Toast.makeText(AdminMainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

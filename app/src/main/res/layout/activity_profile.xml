@@ -98,7 +98,9 @@
                 android:layout_marginBottom="12dp"
                 android:background="#E8F5E9"
                 android:drawableStart="@drawable/baseline_admin_panel_settings_24"
+                android:drawableEnd="@android:drawable/ic_media_play"
                 android:drawablePadding="12dp"
+                android:drawableTint="#999999"
                 android:padding="16dp"
                 android:text="Admin Dashboard"
                 android:textColor="#2E7D32"
@@ -118,19 +120,6 @@
                 android:textColor="#333333"
                 android:textSize="16sp"
                 android:layout_marginBottom="2dp"/>
-
-            <TextView
-                android:id="@+id/btnSalesRequests"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Incoming Requests (Selling)"
-                android:padding="16dp"
-                android:background="#FFFFFF"
-                android:drawableEnd="@android:drawable/ic_media_play"
-                android:drawableTint="#999999"
-                android:textColor="#333333"
-                android:textSize="16sp"
-                android:layout_marginBottom="20dp"/>
 
             <Button
                 android:id="@+id/btnLogout"

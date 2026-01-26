@@ -31,11 +31,11 @@ public interface NotificationService {
     @GET("notifications")
     Call<List<Notification>> getNotifications(@Header("api_key") String apiKey, @QueryMap Map<String, String> options);
 
-    @GET("notifications/expanded")
-    Call<List<MyNotificationResponse>> getNotificationsByReceiverId(
-            @Header("api_key") String token,
-            @Query("receiver_id") int receiverId
-    );
+//    @GET("notifications/expanded")
+//    Call<List<MyNotificationResponse>> getNotificationsByReceiverId(
+//            @Header("api_key") String token,
+//            @Query("receiver_id") int receiverId
+//    );
     @POST("notifications")
     Call<Notification> createNotification(@Header("api_key") String apiKey, @Body Notification notification);
 

@@ -1,10 +1,7 @@
 package com.enth.uitmedown.presentation;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,10 +11,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.enth.uitmedown.R;
+import com.enth.uitmedown.databinding.ActivityMainBinding;
+import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.presentation.adapter.ItemAdapter;
 import com.enth.uitmedown.model.Item;
 import com.enth.uitmedown.model.User;
@@ -27,7 +23,9 @@ import com.enth.uitmedown.sharedpref.SharedPrefManager;
 import com.enth.uitmedown.utils.GridUtils;
 import com.enth.uitmedown.utils.NavigationUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +33,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView rvItems;
+    private ActivityMainBinding binding;
     private ItemService itemService;
 
     private SharedPrefManager spm;
@@ -44,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -55,12 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationUtils.setupBottomNav(this);
 
-        // 2. Setup UI
-        rvItems = findViewById(R.id.rvItems);
         setupRecyclerView();
 
-        findViewById(R.id.btnNotifications).setOnClickListener(v -> {
-            doOpenNotification();
+        binding.btnNotifications.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, NotificationActivity.class));
         });
 
         itemService = ApiUtils.getItemService();
@@ -70,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         int numberOfColumns = GridUtils.calculateNoOfColumns(this, 180);
 
-        rvItems.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        binding.rvItems.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
     }
 
     /**
@@ -80,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadItems();
+        updateNotificationBadge();
     }
 
     private void loadItems() {
@@ -98,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
                     // Attach the adapter
                     ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
-                    rvItems.setAdapter(adapter);
+                    binding.rvItems.setAdapter(adapter);
                 } else {
                     Toast.makeText(MainActivity.this, "Failed to load items. Code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -111,8 +109,42 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void doOpenNotification() {
-        startActivity(new Intent(MainActivity.this, NotificationActivity.class));
+    private void updateNotificationBadge() {
+        User user = spm.getUser();
+        if (user == null) return; // Safety check
+
+        Map<String, String> options = new HashMap<>();
+        options.put("receiver_id", String.valueOf(user.getId()));
+        options.put("is_read", "0");
+
+        ApiUtils.getNotificationService().getNotifications(user.getToken(), options)
+                .enqueue(new Callback<List<Notification>>() {
+                    @Override
+                    public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            int unreadCount = response.body().size();
+
+                            if (unreadCount > 0) {
+                                binding.tvNotificationBadge.setVisibility(View.VISIBLE);
+
+                                // Cap the number at 99+ so it fits in the circle
+                                if (unreadCount > 99) {
+                                    binding.tvNotificationBadge.setText("99+");
+                                } else {
+                                    binding.tvNotificationBadge.setText(String.valueOf(unreadCount));
+                                }
+                            } else {
+                                // Hide if 0
+                                binding.tvNotificationBadge.setVisibility(View.GONE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Notification>> call, Throwable t) {
+                        binding.tvNotificationBadge.setVisibility(View.GONE);
+                    }
+                });
     }
 
 }

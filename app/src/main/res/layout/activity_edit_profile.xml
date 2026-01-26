@@ -19,7 +19,7 @@
             android:layout_marginBottom="24dp"
             android:background="#FFFFFF"
             android:elevation="4dp"
-            android:paddingHorizontal="16dp">
+            android:paddingHorizontal="8dp">
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="wrap_content"

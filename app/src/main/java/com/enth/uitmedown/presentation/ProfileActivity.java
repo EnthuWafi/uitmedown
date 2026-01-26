@@ -16,7 +16,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
-import com.enth.uitmedown.R;
 import com.enth.uitmedown.databinding.ActivityProfileBinding;
 import com.enth.uitmedown.model.User;
 import com.enth.uitmedown.model.UserRole;
@@ -27,6 +26,8 @@ import com.enth.uitmedown.utils.NavigationUtils;
 public class ProfileActivity extends AppCompatActivity {
 
     private ActivityProfileBinding binding;
+    private SharedPrefManager spm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,32 +40,19 @@ public class ProfileActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 1. Setup Nav
+        // Setup Nav
         NavigationUtils.setupBottomNav(this);
 
-        // 2. Load User Info
-        SharedPrefManager spm = new SharedPrefManager(this);
+        spm = new SharedPrefManager(this);
         User user = spm.getUser();
 
-        TextView tvName = binding.tvUsername;
-        TextView tvEmail = binding.tvEmail;
+        loadProfile();
 
-        tvName.setText(user.getUsername());
-        tvEmail.setText(user.getEmail());
-
-        if (user.getPictureFile() != null && user.getPictureFile().getFile() != null) {
-            String serverPath = user.getPictureFile().getFile();
-
-            String fullUrl = RetrofitClient.BASE_URL + serverPath;
-
-            Glide.with(this).load(fullUrl).into(binding.imgProfile);
-        }
-
-        // 3. EDIT PROFILE LOGIC
+        //edit profile here
         binding.btnEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(this, EditProfileActivity.class);
-            intent.putExtra("USER_DATA", user);
-            startActivity(intent);
+            //startActivity(intent);
+            updateProfileLauncher.launch(intent);
         });
 
         if (UserRole.ADMIN.getRoleName().equalsIgnoreCase(user.getRole()) ||
@@ -79,11 +67,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         binding.btnMyOrders.setOnClickListener(v -> {
             startActivity(new Intent(ProfileActivity.this, MyOrdersActivity.class));
-        });
-
-        binding.btnSalesRequests.setOnClickListener(v -> {
-
-            startActivity(new Intent(ProfileActivity.this, RequestsActivity.class));
         });
 
         // Logout
@@ -101,6 +84,24 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void loadProfile() {
+        User user = spm.getUser();
+
+        TextView tvName = binding.tvUsername;
+        TextView tvEmail = binding.tvEmail;
+
+        tvName.setText(user.getUsername());
+        tvEmail.setText(user.getEmail());
+
+        if (user.getPictureFile() != null && user.getPictureFile().getFile() != null) {
+            String serverPath = user.getPictureFile().getFile();
+
+            String fullUrl = RetrofitClient.BASE_URL + serverPath;
+
+            Glide.with(this).load(fullUrl).into(binding.imgProfile);
+        }
+    }
+
     private final ActivityResultLauncher<Intent> changePassLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -110,4 +111,16 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
     );
+
+    private final ActivityResultLauncher<Intent> updateProfileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    String msg = result.getData().getStringExtra("MESSAGE");
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                    loadProfile();
+                }
+            }
+    );
+
 }

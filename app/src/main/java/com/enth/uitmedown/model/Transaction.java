@@ -14,12 +14,6 @@ public class Transaction implements Serializable {
     @SerializedName("buyer_id")
     private Integer buyerId;
 
-    @SerializedName("seller")
-    private User seller;
-
-    @SerializedName("seller_id")
-    private Integer sellerId;
-
     @SerializedName("item")
     private Item item;
 
@@ -58,13 +52,6 @@ public class Transaction implements Serializable {
         this.buyer = buyer;
     }
 
-    public User getSeller() {
-        return seller;
-    }
-
-    public void setSeller(User seller) {
-        this.seller = seller;
-    }
 
     public Item getItem() {
         return item;
@@ -105,15 +92,6 @@ public class Transaction implements Serializable {
     public void setBuyerId(Integer buyerId) {
         this.buyerId = buyerId;
     }
-
-    public Integer getSellerId() {
-        return sellerId;
-    }
-
-    public void setSellerId(Integer sellerId) {
-        this.sellerId = sellerId;
-    }
-
     public Integer getItemId() {
         return itemId;
     }

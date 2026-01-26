@@ -3,6 +3,7 @@ package com.enth.uitmedown.remote;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -15,6 +16,7 @@ import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 import com.enth.uitmedown.model.FileModel;
+import com.enth.uitmedown.model.Notification;
 import com.enth.uitmedown.model.User;
 
 import java.util.List;
@@ -40,6 +42,7 @@ public interface UserService {
     @GET("users/{id}")
     Call<User> getUser(@Header("api_key") String token, @Path("id") int id);
 
+
     @PUT("users/{id}")
     Call<User> updateUser(
             @Header("api_key") String token,
@@ -48,10 +51,18 @@ public interface UserService {
     );
 
     @PUT("users/{id}")
-    Call<User> updateUser(
+    Call<User> updateUserField(
             @Header("api_key") String token,
             @Path("id") int id,
-            @QueryMap Map<String, String> options);
+            @Body Map<String, Object> partialUpdate
+    );
+
+    @DELETE("users/{id}")
+    Call<User> deleteUser(
+            @Header("api_key") String token,
+            @Path("id") int id
+    );
+
     @Multipart
     @POST("files")
     Call<FileModel> uploadProfilePicture(@Header("api_key") String token, @Part MultipartBody.Part file);

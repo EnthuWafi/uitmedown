@@ -46,6 +46,10 @@
     <string name="profile">Profile</string>
     <string name="back">Back</string>
     <string name="registration">Registration</string>
+    <string-array name="user_roles">
+        <item value="admin">Admin</item>
+        <item value="user">User</item>
+    </string-array>
 
 
 </resources>
