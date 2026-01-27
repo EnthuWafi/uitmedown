@@ -12,8 +12,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.enth.uitmedown.R;
+import com.enth.uitmedown.model.MyRequestResponse;
 import com.enth.uitmedown.model.Transaction;
 import com.enth.uitmedown.model.User;
+import com.enth.uitmedown.presentation.adapter.MyRequestAdapter;
 import com.enth.uitmedown.presentation.adapter.OrderAdapter;
 import com.enth.uitmedown.remote.ApiUtils;
 import com.enth.uitmedown.sharedpref.SharedPrefManager;
@@ -58,17 +60,17 @@ public class RequestsActivity extends AppCompatActivity {
         User user = spm.getUser();
 
         ApiUtils.getTransactionService().getTransactionsBySellerId(user.getToken(), user.getId())
-                .enqueue(new Callback<List<Transaction>>() {
+                .enqueue(new Callback<List<MyRequestResponse>>() {
                     @Override
-                    public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                    public void onResponse(Call<List<MyRequestResponse>> call, Response<List<MyRequestResponse>> response) {
                         if (response.isSuccessful()) {
-                            List<Transaction> transactions = response.body();
+                            List<MyRequestResponse> transactions = response.body();
 
                             if (transactions == null) {
                                 transactions = new java.util.ArrayList<>();
                             }
 
-                            OrderAdapter adapter = new OrderAdapter(RequestsActivity.this, transactions, transaction -> {
+                            MyRequestAdapter adapter = new MyRequestAdapter(RequestsActivity.this, transactions, transaction -> {
                                 // REDIRECT TO DETAILS
                                 Intent intent = new Intent(RequestsActivity.this, TransactionDetailActivity.class);
                                 intent.putExtra("TRANSACTION_ID", transaction.getTransactionId());
@@ -86,7 +88,7 @@ public class RequestsActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                    public void onFailure(Call<List<MyRequestResponse>> call, Throwable t) {
                         Toast.makeText(RequestsActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
                     }
                 });

@@ -13,6 +13,7 @@ import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
 
 import com.enth.uitmedown.model.DeleteResponse;
+import com.enth.uitmedown.model.MyRequestResponse;
 import com.enth.uitmedown.model.Transaction;
 
 import java.util.List;
@@ -32,10 +33,10 @@ public interface TransactionService {
             @QueryMap Map<String, String> options
     );
 
-    @GET("users/{id}/transactions")
-    Call<List<Transaction>> getTransactionsBySellerId(
+    @GET("transactions/requests")
+    Call<List<MyRequestResponse>> getTransactionsBySellerId(
             @Header("api_key") String apiKey,
-            @Path("id") int id
+            @Query("seller_id") int sellerId
     );
 
     @GET("transactions")
