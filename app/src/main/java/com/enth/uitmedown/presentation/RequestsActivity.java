@@ -64,12 +64,10 @@ public class RequestsActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             List<Transaction> transactions = response.body();
 
-                            // If 204, body is null. So we create an empty list manually.
                             if (transactions == null) {
                                 transactions = new java.util.ArrayList<>();
                             }
 
-                            // 2. Set the adapter
                             OrderAdapter adapter = new OrderAdapter(RequestsActivity.this, transactions, transaction -> {
                                 // REDIRECT TO DETAILS
                                 Intent intent = new Intent(RequestsActivity.this, TransactionDetailActivity.class);
@@ -78,13 +76,11 @@ public class RequestsActivity extends AppCompatActivity {
                             });
                             rvSelling.setAdapter(adapter);
 
-                            // Show "No Requests" text if empty
                             if (transactions.isEmpty()) {
                                 Toast.makeText(RequestsActivity.this, "No active requests.", Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
-                            // This handles actual errors (404, 500, etc.)
                             Toast.makeText(RequestsActivity.this, "Failed: " + response.code(), Toast.LENGTH_SHORT).show();
                         }
                     }

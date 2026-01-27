@@ -32,16 +32,16 @@ public interface TransactionService {
             @QueryMap Map<String, String> options
     );
 
-    @GET("transactions")
+    @GET("users/{id}/transactions")
     Call<List<Transaction>> getTransactionsBySellerId(
             @Header("api_key") String apiKey,
-            @Query("seller_id[in]") int sellerId
+            @Path("id") int id
     );
 
     @GET("transactions")
     Call<List<Transaction>> getTransactionsByBuyerId(
             @Header("api_key") String apiKey,
-            @Query("buyer_id[in]") int buyerId
+            @Query("buyer_id") int buyerId
     );
 
     @POST("transactions")
