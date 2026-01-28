@@ -85,6 +85,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void doLogin(String username, String password) {
+        username = username.trim();
+        password = password.trim();
         UserService userService = ApiUtils.getUserService();
         Call<User> call;
         showLoading();

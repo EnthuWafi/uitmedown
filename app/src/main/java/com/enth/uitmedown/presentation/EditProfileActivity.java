@@ -98,14 +98,12 @@ public class EditProfileActivity extends AppCompatActivity {
         if (selectedImageUri != null) {
             uploadImageAndUpdate();
         } else {
-            // 2. Otherwise just update text fields
             updateUserInDatabase(null);
         }
     }
 
     private void uploadImageAndUpdate() {
         File file = FileUtils.getFileFromUri(this, selectedImageUri);
-        // Safety check: FileUtils might fail if URI is weird
         if (file == null) {
             Toast.makeText(this, "Could not process image file", Toast.LENGTH_SHORT).show();
             resetButton();
@@ -138,7 +136,6 @@ public class EditProfileActivity extends AppCompatActivity {
         String newUsername = binding.edtUsername.getText().toString().trim();
         String newPhone = binding.edtPhone.getText().toString().trim();
 
-        // --- THE FIX: USE A MAP INSTEAD OF THE USER OBJECT ---
         Map<String, Object> updates = new HashMap<>();
         updates.put("username", newUsername);
         updates.put("phone_number", newPhone);
@@ -169,6 +166,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                             // 3. Return OK to previous screen (ProfileFragment)
                             Intent resultIntent = new Intent();
+                            resultIntent.putExtra("MESSAGE", "Profile updated successfully!");
                             setResult(RESULT_OK, resultIntent);
                             finish();
                         } else {
