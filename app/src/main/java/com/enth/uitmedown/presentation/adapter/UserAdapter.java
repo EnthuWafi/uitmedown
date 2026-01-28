@@ -22,6 +22,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public interface OnUserActionListener {
         void onStatusChanged(User user, int newStatus);
+
+        void onVerifyChanged(User user, int newVerify);
         void onUserLongClick(User user, View view);
     }
 
@@ -71,6 +73,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.imgAvatar.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
+        //active
         holder.switchActive.setOnCheckedChangeListener(null);
 
         // Set the visual state (1 = Active/True, 0 = Banned/False)
@@ -84,6 +87,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 user.setIsActive(newStatus);
 
                 listener.onStatusChanged(user, newStatus);
+            }
+        });
+
+        //verify
+        holder.switchVerify.setOnCheckedChangeListener(null);
+
+        holder.switchVerify.setChecked(user.getIsVerified() == 1);
+
+        holder.switchVerify.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (buttonView.isPressed()) {
+                int newVerify = isChecked ? 1 : 0;
+
+                user.setIsVerified(newVerify);
+
+                listener.onVerifyChanged(user, newVerify);
             }
         });
 
@@ -101,7 +119,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvUserName, tvUserEmail;
         ImageView imgAvatar;
-        SwitchMaterial switchActive;
+        SwitchMaterial switchActive, switchVerify;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -109,6 +127,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             tvUserEmail = itemView.findViewById(R.id.tvUserEmail);
             imgAvatar = itemView.findViewById(R.id.imgUserAvatar);
             switchActive = itemView.findViewById(R.id.switchActive);
+            switchVerify = itemView.findViewById(R.id.switchVerify);
         }
     }
 }

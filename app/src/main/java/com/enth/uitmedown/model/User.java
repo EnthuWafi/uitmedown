@@ -25,6 +25,9 @@ public class User implements Serializable  {
     private String role;
     @SerializedName("is_active")
     private int isActive;
+
+    @SerializedName("is_verified")
+    private int isVerified;
     @SerializedName("secret")
     private String secret;
 
@@ -99,6 +102,14 @@ public class User implements Serializable  {
 
     public void setIsActive(int isActive) {
         this.isActive = isActive;
+    }
+
+    public int getIsVerified() {
+        return isVerified;
+    }
+
+    public void setIsVerified(int isVerified) {
+        this.isVerified = isVerified;
     }
 
     public String getSecret() {
