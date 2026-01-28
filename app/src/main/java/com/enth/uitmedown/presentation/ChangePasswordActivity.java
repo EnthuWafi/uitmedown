@@ -26,6 +26,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.btnSubmitChange.setOnClickListener(v -> attemptChangePassword());
+
+        binding.btnBack.setOnClickListener(v -> finish());
     }
 
     private void attemptChangePassword() {
