@@ -40,8 +40,7 @@ public interface ItemService {
     }
 
     @GET("items")
-    Call<List<Item>> getItemsBySellerId(@Header("api_key") String apiKey, @Query("seller_id[in]") int sellerId);
-
+    Call<List<Item>> getItemsBySellerId(@Header("api_key") String apiKey, @Query("seller_id") int sellerId);
 
     @Multipart
     @POST("files")
