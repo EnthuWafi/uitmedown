@@ -46,11 +46,9 @@ public class MyRequestAdapter extends RecyclerView.Adapter<MyRequestAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MyRequestResponse request = requestList.get(position);
 
-        // 1. Title Format: "Calculus Book • Buyer: Ahmad"
-        String displayTitle = request.getItemTitle();
-        if (request.getBuyerName() != null) {
-            displayTitle += " • Buyer: " + request.getBuyerName();
-        }
+        String itemName = (request.getItemTitle() != null) ? request.getItemTitle() : "Item #" + request.getItemId();
+
+        String displayTitle = itemName;
         holder.tvItemName.setText(displayTitle);
 
         // 2. Price
