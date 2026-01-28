@@ -87,6 +87,9 @@ public class ItemDetailActivity extends AppCompatActivity {
         binding.tvDetailPrice.setText("RM " + item.getPrice());
         binding.tvDetailDesc.setText(item.getDescription());
 
+        String verifiedString = item.getSeller().getIsVerified() == 1 ? "Verified Seller" : "Unverified Seller";
+        binding.tvVerified.setText(verifiedString);
+
         binding.tvSellerName.setText(item.getSeller().getUsername());
 
         if (item.getFile() != null && item.getFile().getFile() != null) {

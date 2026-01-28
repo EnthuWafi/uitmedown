@@ -85,6 +85,11 @@ public class AdminMainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onVerifyChanged(User user, int newVerify) {
+                updateUserVerify(user, newVerify);
+            }
+
+            @Override
             public void onUserLongClick(User targetUser, View view) {
                 User me = spm.getUser();
                 if (UserRole.SUPERADMIN.getRoleName().equalsIgnoreCase(me.getRole())) {
@@ -272,6 +277,45 @@ public class AdminMainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void updateUserVerify(User user, int newVerify) {
+        String token = spm.getUser().getToken();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("is_verified", newVerify);
+
+        //prevent deactivating greater authority
+        if (user.getRole().equalsIgnoreCase(UserRole.SUPERADMIN.getRoleName())) {
+            Toast.makeText(AdminMainActivity.this, "Can't make superadmin not verified", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ApiUtils.getUserService().updateUserField(token, user.getId(), updates)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> response) {
+                        if (response.isSuccessful()) {
+                            String statusText = (newVerify == 1) ? "verified" : "unverified";
+                            Toast.makeText(AdminMainActivity.this, "User " + statusText, Toast.LENGTH_SHORT).show();
+                            user.setIsVerified(newVerify);
+                        } else {
+                            Toast.makeText(AdminMainActivity.this, "Update failed: " + response.code(), Toast.LENGTH_SHORT).show();
+
+                            user.setIsVerified(newVerify == 1 ? 0 : 1);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        Toast.makeText(AdminMainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+
+                        user.setIsVerified(newVerify == 1 ? 0 : 1);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+    }
+
     private void setupSearch() {
         binding.edtSearchUser.addTextChangedListener(new TextWatcher() {
             @Override
